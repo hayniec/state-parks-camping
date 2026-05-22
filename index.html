@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>CampAL - Alabama Campground Discovery</title>
+  
+  <!-- PWA Manifest -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#0d0e12">
+  
+  <!-- Leaflet Map CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  
+  <!-- Custom Fonts & Styles -->
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <!-- Top Navigation Branding Bar -->
+  <header class="top-nav glass">
+    <div class="brand-wrapper">
+      <div class="brand-logo">
+        <i data-lucide="tent"></i>
+        <span>CampAL</span>
+      </div>
+      <div class="brand-badge">Alabama</div>
+    </div>
+    
+    <div class="nav-actions">
+      <button id="btn-toggle-filter" class="btn btn-icon active">
+        <i data-lucide="sliders-horizontal"></i>
+      </button>
+    </div>
+  </header>
+
+  <!-- Interactive Map Canvas -->
+  <main id="map"></main>
+
+  <!-- Floating Filter Control Panel -->
+  <section id="filter-panel" class="filter-panel glass">
+    <div class="filter-panel-header">
+      <div class="drag-handle"></div>
+      <div class="filter-title-row">
+        <h2 class="filter-title">Campground Filters</h2>
+        <button id="btn-reset" class="btn-reset">Reset</button>
+      </div>
+    </div>
+    
+    <div class="filter-panel-body">
+      <!-- 1. Camping Type -->
+      <div class="filter-section">
+        <h3 class="filter-section-title">Camping Type</h3>
+        <div class="camping-types-row">
+          <div class="camp-type-card" id="card-rv">
+            <input type="checkbox" id="filter-rv">
+            <i data-lucide="truck" class="icon"></i>
+            <span class="label">RV Camping</span>
+          </div>
+          <div class="camp-type-card" id="card-tent">
+            <input type="checkbox" id="filter-tent">
+            <i data-lucide="tent" class="icon"></i>
+            <span class="label">Tent Camping</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2. Minimum Sites Counts -->
+      <div class="filter-section">
+        <h3 class="filter-section-title">Campground Capacity</h3>
+        
+        <div class="range-container">
+          <div class="range-labels">
+            <span>Min RV Campsites</span>
+            <span id="label-rv-count">0 sites</span>
+          </div>
+          <input type="range" id="min-rv-sites" class="range-slider" min="0" max="200" step="5" value="0">
+        </div>
+
+        <div class="range-container" style="margin-top: 10px;">
+          <div class="range-labels">
+            <span>Min Tent/Primitive Sites</span>
+            <span id="label-tent-count">0 sites</span>
+          </div>
+          <input type="range" id="min-tent-sites" class="range-slider" min="0" max="50" step="2" value="0">
+        </div>
+      </div>
+
+      <!-- 3. Google Place Rating -->
+      <div class="filter-section">
+        <h3 class="filter-section-title">Google Rating</h3>
+        <div class="range-container">
+          <div class="range-labels">
+            <span>Minimum Star Rating</span>
+            <span id="label-rating" style="font-weight: 600; color: hsl(40, 95%, 55%);">★ 0.0</span>
+          </div>
+          <input type="range" id="min-rating" class="range-slider" min="0" max="5" step="0.1" value="0">
+        </div>
+      </div>
+
+      <!-- 4. Hookups -->
+      <div class="filter-section">
+        <h3 class="filter-section-title">Hookups (RV)</h3>
+        <div class="chips-grid">
+          <label class="chip-label">
+            <input type="checkbox" id="amenity-full">
+            <span class="chip-bullet"></span>
+            <span>Full Hookups</span>
+          </label>
+          <label class="chip-label">
+            <input type="checkbox" id="amenity-50amp">
+            <span class="chip-bullet"></span>
+            <span>50-Amp Electric</span>
+          </label>
+          <label class="chip-label">
+            <input type="checkbox" id="amenity-water">
+            <span class="chip-bullet"></span>
+            <span>Water Hookup</span>
+          </label>
+          <label class="chip-label">
+            <input type="checkbox" id="amenity-sewer">
+            <span class="chip-bullet"></span>
+            <span>Sewer Hookup</span>
+          </label>
+          <label class="chip-label">
+            <input type="checkbox" id="amenity-dump">
+            <span class="chip-bullet"></span>
+            <span>Dump Station</span>
+          </label>
+          <label class="chip-label">
+            <input type="checkbox" id="amenity-pullthru">
+            <span class="chip-bullet"></span>
+            <span>Pull-Through</span>
+          </label>
+        </div>
+      </div>
+
+      <!-- 5. Amenities -->
+      <div class="filter-section">
+        <h3 class="filter-section-title">Amenities</h3>
+        <div class="chips-grid">
+          <label class="chip-label">
+            <input type="checkbox" id="amenity-pet">
+            <span class="chip-bullet"></span>
+            <span>Pet Friendly</span>
+          </label>
+          <label class="chip-label">
+            <input type="checkbox" id="amenity-showers">
+            <span class="chip-bullet"></span>
+            <span>Showers</span>
+          </label>
+          <label class="chip-label">
+            <input type="checkbox" id="amenity-wifi">
+            <span class="chip-bullet"></span>
+            <span>WiFi</span>
+          </label>
+          <label class="chip-label">
+            <input type="checkbox" id="amenity-laundry">
+            <span class="chip-bullet"></span>
+            <span>Laundry</span>
+          </label>
+        </div>
+      </div>
+
+      <!-- 6. Features & Activities -->
+      <div class="filter-section">
+        <h3 class="filter-section-title">Activities & Features</h3>
+        <div class="chips-grid">
+          <label class="chip-label">
+            <input type="checkbox" id="activity-hiking">
+            <span class="chip-bullet"></span>
+            <span>Hiking Trails</span>
+          </label>
+          <label class="chip-label">
+            <input type="checkbox" id="activity-fishing">
+            <span class="chip-bullet"></span>
+            <span>Fishing Spot</span>
+          </label>
+          <label class="chip-label">
+            <input type="checkbox" id="activity-swimming">
+            <span class="chip-bullet"></span>
+            <span>Swimming</span>
+          </label>
+          <label class="chip-label">
+            <input type="checkbox" id="activity-boat">
+            <span class="chip-bullet"></span>
+            <span>Boat Ramp</span>
+          </label>
+          <label class="chip-label">
+            <input type="checkbox" id="activity-golf">
+            <span class="chip-bullet"></span>
+            <span>Golf Course</span>
+          </label>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Sliding Details Drawer (Slides up/in when a park is selected) -->
+  <article id="detail-drawer" class="detail-drawer glass">
+    <div class="detail-drawer-header">
+      <div class="drag-handle"></div>
+      <button id="btn-close-drawer" class="btn btn-icon btn-close-drawer">
+        <i data-lucide="x"></i>
+      </button>
+      
+      <div class="header-meta">
+        <span class="header-subtitle" id="drawer-slug">Alabama State Park</span>
+        <h2 class="header-park-name" id="drawer-park-name">Park Name</h2>
+      </div>
+    </div>
+    
+    <div class="detail-drawer-body">
+      <!-- Ratings Block -->
+      <div class="rating-bar-container" id="drawer-rating-block">
+        <div class="rating-score" id="drawer-rating-score">4.7</div>
+        <div class="rating-details">
+          <div class="stars-row" id="drawer-stars">
+            <!-- Stars dynamic -->
+          </div>
+          <span class="review-count" id="drawer-review-count">1,245 reviews</span>
+        </div>
+      </div>
+
+      <!-- Capacity & Specs -->
+      <div class="detail-grid">
+        <div class="detail-card">
+          <span class="detail-card-label">RV Campsites</span>
+          <span class="detail-card-value highlight" id="drawer-rv-count">Yes</span>
+        </div>
+        <div class="detail-card">
+          <span class="detail-card-label">Tent Campsites</span>
+          <span class="detail-card-value highlight" id="drawer-tent-count">Yes</span>
+        </div>
+        <div class="detail-card">
+          <span class="detail-card-label">Primitive Camping</span>
+          <span class="detail-card-value" id="drawer-primitive">Available</span>
+        </div>
+        <div class="detail-card">
+          <span class="detail-card-label">Max Rig Length</span>
+          <span class="detail-card-value" id="drawer-rig-length">35 ft</span>
+        </div>
+      </div>
+
+      <!-- Description Section -->
+      <div class="filter-section">
+        <h3 class="filter-section-title">Campground Description</h3>
+        <p class="desc-text" id="drawer-desc">
+          Description content goes here...
+        </p>
+      </div>
+
+      <!-- Amenities Section -->
+      <div class="filter-section">
+        <h3 class="filter-section-title">Amenities checklist</h3>
+        <div class="badge-container" id="drawer-amenities-container">
+          <!-- Badges list -->
+        </div>
+      </div>
+
+      <!-- Activities Section -->
+      <div class="filter-section">
+        <h3 class="filter-section-title">Available Activities</h3>
+        <div class="badge-container" id="drawer-activities-container">
+          <!-- Activities list -->
+        </div>
+      </div>
+
+      <!-- Contact Info Section -->
+      <div class="filter-section">
+        <h3 class="filter-section-title">Contact & Location</h3>
+        <div class="contact-section">
+          <a href="#" target="_blank" class="contact-row" id="drawer-address">
+            <i data-lucide="map-pin" class="icon"></i>
+            <span>Address goes here...</span>
+          </a>
+          <a href="#" class="contact-row" id="drawer-phone-camp">
+            <i data-lucide="phone-call" class="icon"></i>
+            <span>Call Camping Info</span>
+          </a>
+          <a href="#" class="contact-row" id="drawer-phone-gen">
+            <i data-lucide="phone" class="icon"></i>
+            <span>Call Park Office</span>
+          </a>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Action buttons footer -->
+    <div class="detail-actions">
+      <a href="#" target="_blank" class="btn btn-primary" id="btn-reserve">
+        <i data-lucide="calendar-check"></i> Book Campsite
+      </a>
+      <a href="#" target="_blank" class="btn btn-icon" id="btn-maps">
+        <i data-lucide="map"></i>
+      </a>
+    </div>
+  </article>
+
+  <!-- External Library CDNs -->
+  <!-- PapaParse for Client-Side CSV Reading -->
+  <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+  
+  <!-- Leaflet Map JS -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  
+  <!-- Application JS Controller -->
+  <script src="app.js"></script>
+</body>
+</html>
