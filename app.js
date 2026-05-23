@@ -191,6 +191,24 @@ function applyFilters() {
 }
 
 /* ==========================================================================
+   Helper: Extract Hours from raw description text
+   ========================================================================== */
+function extractHours(text) {
+  if (!text) return null;
+  const hoursMatch = text.match(/HOURS\s+/i);
+  if (!hoursMatch) return null;
+  const hoursStart = hoursMatch.index + hoursMatch[0].length;
+  const searchArea = text.substring(hoursStart);
+  
+  // Find the next sentence start (capital letter followed by lowercase) or PLAN YOUR VISIT
+  const limitMatch = searchArea.match(/(?:PLAN\s+YOUR\s+VISIT:|[A-Z][a-z]+)/i);
+  if (limitMatch) {
+    return searchArea.substring(0, limitMatch.index).trim();
+  }
+  return searchArea.trim();
+}
+
+/* ==========================================================================
    Helper: Clean up raw description text
    ========================================================================== */
 function cleanDescription(text, parkName) {
@@ -236,7 +254,10 @@ function cleanDescription(text, parkName) {
   // 3. Remove leading line separators, underscores, or stray characters
   clean = clean.replace(/^[_\s\-\u2014\n\r]+/, "");
   
-  // 4. Fallback if cleanup left us with almost nothing
+  // 4. Format list items of admission fees and passes onto separate lines
+  clean = clean.replace(/\b(Age\s+\d+-\d+:|Age\s+\d+\s+and\s+older:|\d+\s+and\s+older:|Senior\s+Citizen\s+age|Parks\s+for\s+Patriots|ANNUAL\s+PASSES|Senior\s+and\s+Disability|Individuals\s+Pass|Family\s+Pass)\b/g, "\n$1");
+
+  // 5. Fallback if cleanup left us with almost nothing
   if (clean.length < 50) {
     return text.trim();
   }
@@ -302,10 +323,55 @@ function selectPark(park, marker) {
     ratingContainer.classList.add("hidden");
   }
 
-  // Description text
-  const rawDesc = park.description_text || park.campground_text || "No description available.";
+  // Description text & Quick details block (address, phone, hours)
+  const rawDesc = park.description_text || park.campground_text || "";
   const desc = cleanDescription(rawDesc, park.park_name);
   document.getElementById("drawer-desc").textContent = desc;
+
+  // Render the structured quick info block
+  const quickInfoContainer = document.getElementById("drawer-quick-info");
+  quickInfoContainer.innerHTML = "";
+  let hasQuickInfo = false;
+
+  if (park.address) {
+    quickInfoContainer.innerHTML += `
+      <div class="quick-info-item">
+        <i data-lucide="map-pin" class="icon"></i>
+        <span><span class="label">Address:</span> ${park.address}</span>
+      </div>
+    `;
+    hasQuickInfo = true;
+  }
+
+  const phone = park.phone_camping || park.phone_general;
+  if (phone) {
+    quickInfoContainer.innerHTML += `
+      <div class="quick-info-item">
+        <i data-lucide="phone" class="icon"></i>
+        <span><span class="label">Phone:</span> ${phone}</span>
+      </div>
+    `;
+    hasQuickInfo = true;
+  }
+
+  const hours = extractHours(rawDesc);
+  if (hours) {
+    // Format hours subheaders (e.g. Winter Hours, Summer Hours) onto separate lines with bullets
+    const formattedHours = hours.replace(/(winter|summer|store|office|gate|campground)\s+hours/gi, "<br>• $&");
+    quickInfoContainer.innerHTML += `
+      <div class="quick-info-item">
+        <i data-lucide="clock" class="icon"></i>
+        <span><span class="label">Hours:</span> ${formattedHours}</span>
+      </div>
+    `;
+    hasQuickInfo = true;
+  }
+
+  if (hasQuickInfo) {
+    quickInfoContainer.classList.remove("hidden");
+  } else {
+    quickInfoContainer.classList.add("hidden");
+  }
 
   // Detail Cards Grid
   const rvCount = parseInt(park.rv_sites_count);
