@@ -44,6 +44,11 @@
   <!-- Interactive Map Canvas -->
   <main id="map"></main>
 
+  <!-- Floating Locate Me Button -->
+  <button id="btn-locate-me" class="btn btn-icon btn-locate-me glass" title="Locate Me">
+    <i data-lucide="navigation"></i>
+  </button>
+
   <!-- Floating Filter Control Panel -->
   <section id="filter-panel" class="filter-panel glass">
     <div class="filter-panel-header">
@@ -212,7 +217,13 @@
       </button>
       
       <div class="header-meta">
-        <span class="header-subtitle" id="drawer-slug">Alabama State Park</span>
+        <div class="header-subtitle-row">
+          <span class="header-subtitle" id="drawer-slug">Alabama State Park</span>
+          <span class="distance-badge hidden" id="drawer-distance">
+            <i data-lucide="navigation" style="width: 10px; height: 10px;"></i>
+            <span id="drawer-distance-value">0.0 mi away</span>
+          </span>
+        </div>
         <h2 class="header-park-name" id="drawer-park-name">Park Name</h2>
       </div>
     </div>
@@ -301,8 +312,11 @@
       <a href="#" target="_blank" class="btn btn-primary" id="btn-reserve">
         <i data-lucide="calendar-check"></i> Book Campsite
       </a>
-      <a href="#" target="_blank" class="btn btn-icon" id="btn-maps">
+      <a href="#" target="_blank" class="btn btn-icon" id="btn-maps" title="View on Google Maps">
         <i data-lucide="map"></i>
+      </a>
+      <a href="#" target="_blank" class="btn btn-icon" id="btn-route" title="Get Directions">
+        <i data-lucide="navigation-2"></i>
       </a>
     </div>
   </article>

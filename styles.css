@@ -753,10 +753,19 @@ h1, h2, h3, h4, .brand-logo {
   padding: 15px 20px calc(15px + var(--safe-bottom)) 20px;
   background: linear-gradient(0deg, var(--bg-base) 60%, transparent 100%);
   border-top: 1px solid var(--border-light);
-  display: grid;
-  grid-template-columns: 1fr 50px;
+  display: flex;
   gap: 10px;
+  align-items: center;
+  justify-content: flex-end;
   z-index: 10;
+}
+
+.detail-actions .btn-primary {
+  flex: 1;
+}
+
+.detail-actions .btn-icon {
+  flex-shrink: 0;
 }
 
 /* Contacts panel formatting */
@@ -984,3 +993,95 @@ h1, h2, h3, h4, .brand-logo {
 .text-center {
   text-align: center;
 }
+
+/* Floating Locate Me Button */
+.btn-locate-me {
+  position: absolute;
+  top: calc(90px + var(--safe-top));
+  right: 15px;
+  z-index: 10;
+  box-shadow: var(--shadow-md);
+  cursor: pointer;
+  border-radius: var(--radius-md);
+  background: var(--bg-surface) !important;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.btn-locate-me:hover {
+  background: hsla(210, 20%, 98%, 0.1) !important;
+  border-color: var(--color-primary) !important;
+  box-shadow: var(--shadow-glow);
+}
+
+.btn-locate-me.active {
+  background: var(--color-primary) !important;
+  color: var(--bg-base) !important;
+  box-shadow: var(--shadow-glow);
+  border-color: var(--color-primary) !important;
+}
+
+/* User Location Pulser Marker */
+.user-location-pin {
+  width: 14px;
+  height: 14px;
+  background-color: #0088ff;
+  border: 2.5px solid #ffffff;
+  border-radius: 50%;
+  box-shadow: 0 0 10px rgba(0, 136, 255, 0.6);
+  position: relative;
+}
+
+.user-location-pin::after {
+  content: '';
+  width: 32px;
+  height: 32px;
+  border: 2px solid #0088ff;
+  border-radius: 50%;
+  position: absolute;
+  top: -11.5px;
+  left: -11.5px;
+  animation: pulse 1.8s infinite ease-out;
+  opacity: 0;
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(0.5);
+    opacity: 0.8;
+  }
+  100% {
+    transform: scale(1.6);
+    opacity: 0;
+  }
+}
+
+/* Distance Badge in Drawer */
+.header-subtitle-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+
+.distance-badge {
+  font-size: 10px;
+  font-weight: 700;
+  background: rgba(0, 242, 254, 0.12);
+  color: var(--color-primary-light);
+  border: 1px solid rgba(0, 242, 254, 0.25);
+  padding: 3px 10px;
+  border-radius: var(--radius-round);
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  box-shadow: 0 0 8px rgba(0, 242, 254, 0.1);
+}
+
+.distance-badge .icon {
+  width: 10px;
+  height: 10px;
+}
+

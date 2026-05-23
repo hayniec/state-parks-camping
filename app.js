@@ -16,6 +16,8 @@ let allParks = [];
 let markersLayer;
 let activeMarker = null;
 let selectedPark = null;
+let userCoords = null;
+let userLocationMarker = null;
 
 // CartoDB Dark Matter Tile Layer
 const TILE_URL = "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png";
@@ -218,6 +220,95 @@ function applyFilters() {
 }
 
 /* ==========================================================================
+   Helper: Calculate distance between two coordinates in miles (Haversine)
+   ========================================================================== */
+function calculateDistance(lat1, lon1, lat2, lon2) {
+  const R = 3958.8; // Radius of the Earth in miles
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLon = (lon2 - lon1) * Math.PI / 180;
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+    Math.sin(dLon / 2) * Math.sin(dLon / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return R * c;
+}
+
+/* ==========================================================================
+   Helper: Locate the user using HTML5 Geolocation API
+   ========================================================================== */
+function locateUser() {
+  const btn = document.getElementById("btn-locate-me");
+  if (!navigator.geolocation) {
+    alert("Geolocation is not supported by your browser.");
+    return;
+  }
+
+  btn.classList.add("active");
+  btn.innerHTML = '<i data-lucide="loader" class="icon animate-spin" style="width: 16px; height: 16px;"></i>';
+  lucide.createIcons();
+
+  navigator.geolocation.getCurrentPosition(
+    (position) => {
+      const lat = position.coords.latitude;
+      const lng = position.coords.longitude;
+      userCoords = [lat, lng];
+
+      // Create or update Leaflet pulsing user location marker
+      const userIcon = L.divIcon({
+        className: "custom-user-icon",
+        html: '<div class="user-location-pin"></div>',
+        iconSize: [32, 32],
+        iconAnchor: [16, 16]
+      });
+
+      if (userLocationMarker) {
+        userLocationMarker.setLatLng(userCoords);
+      } else {
+        userLocationMarker = L.marker(userCoords, { icon: userIcon }).addTo(map);
+      }
+
+      // Find the closest state in our configs based on user location
+      let closestState = activeState;
+      let minDistance = Infinity;
+      for (const [code, state] of Object.entries(STATE_CONFIG)) {
+        const dist = calculateDistance(lat, lng, state.center[0], state.center[1]);
+        if (dist < minDistance) {
+          minDistance = dist;
+          closestState = code;
+        }
+      }
+
+      // Automatically switch the state if user is closest to another configured state
+      if (closestState !== activeState) {
+        activeState = closestState;
+        document.getElementById("state-select").value = activeState;
+        loadParkData();
+      }
+
+      // Smoothly pan and zoom map to user's location
+      map.flyTo(userCoords, 10);
+
+      // Restore button status
+      btn.innerHTML = '<i data-lucide="navigation"></i>';
+      lucide.createIcons();
+    },
+    (error) => {
+      console.warn("Geolocation error:", error);
+      btn.classList.remove("active");
+      btn.innerHTML = '<i data-lucide="navigation"></i>';
+      lucide.createIcons();
+      alert("Unable to retrieve your location. Please check your browser permissions.");
+    },
+    {
+      enableHighAccuracy: true,
+      timeout: 10000,
+      maximumAge: 0
+    }
+  );
+}
+
+/* ==========================================================================
    Helper: Extract Hours from raw description text
    ========================================================================== */
 function extractHours(text) {
@@ -348,6 +439,20 @@ function selectPark(park, marker) {
     }
   } else {
     ratingContainer.classList.add("hidden");
+  }
+
+  // Update Distance Badge if user location is available
+  const distanceBadge = document.getElementById("drawer-distance");
+  const distanceValue = document.getElementById("drawer-distance-value");
+  const lat = parseFloat(park.latitude);
+  const lon = parseFloat(park.longitude);
+
+  if (userCoords && !isNaN(lat) && !isNaN(lon)) {
+    const dist = calculateDistance(userCoords[0], userCoords[1], lat, lon);
+    distanceValue.textContent = `${dist.toFixed(1)} mi away`;
+    distanceBadge.classList.remove("hidden");
+  } else {
+    distanceBadge.classList.add("hidden");
   }
 
   // Description text & Quick details block (address, phone, hours)
@@ -524,6 +629,19 @@ function selectPark(park, marker) {
     btnMaps.classList.add("hidden");
   }
 
+  const btnRoute = document.getElementById("btn-route");
+  if (!isNaN(lat) && !isNaN(lon)) {
+    btnRoute.classList.remove("hidden");
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+    if (isIOS) {
+      btnRoute.href = `maps://maps.apple.com/?daddr=${lat},${lon}&dirflg=d`;
+    } else {
+      btnRoute.href = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lon}`;
+    }
+  } else {
+    btnRoute.classList.add("hidden");
+  }
+
   // Open the drawer
   document.getElementById("detail-drawer").classList.add("active");
   
@@ -652,6 +770,12 @@ function setupUIEventListeners() {
     
     // Fetch and load the selected state's campgrounds CSV
     loadParkData();
+  });
+
+  // Locate Me Button Listener
+  const btnLocateMe = document.getElementById("btn-locate-me");
+  btnLocateMe.addEventListener("click", () => {
+    locateUser();
   });
 
   // Re-render Lucide icons initially
