@@ -774,7 +774,9 @@ h1, h2, h3, h4, .brand-logo {
   font-size: 13.5px;
   line-height: 1.6;
   color: var(--text-secondary);
+  white-space: pre-wrap;
 }
+
 
 /* ==========================================================================
    Leaflet Overrides

@@ -191,6 +191,60 @@ function applyFilters() {
 }
 
 /* ==========================================================================
+   Helper: Clean up raw description text
+   ========================================================================== */
+function cleanDescription(text, parkName) {
+  if (!text) return "No description available.";
+  
+  let clean = text.trim();
+  
+  // 1. Cut off footer boilerplate (from 'Park Reservations' onwards)
+  const footerMatch = clean.match(/Park\s+Reservations\s+All\s+Parks/i);
+  if (footerMatch) {
+    clean = clean.substring(0, footerMatch.index).trim();
+  }
+  
+  const giftCardsMatch = clean.match(/Gift\s+Cards\s+Camping/i);
+  if (giftCardsMatch) {
+    clean = clean.substring(0, giftCardsMatch.index).trim();
+  }
+  
+  // 2. Cut off header boilerplate
+  const planMatch = clean.match(/PLAN\s+YOUR\s+VISIT:/i);
+  if (planMatch) {
+    const planStart = planMatch.index;
+    const searchArea = clean.substring(planStart + 15);
+    const descStartMatch = searchArea.match(/[A-Z][a-z]+/);
+    if (descStartMatch) {
+      const descStart = planStart + 15 + descStartMatch.index;
+      clean = clean.substring(descStart).trim();
+    }
+  } else {
+    // If no PLAN YOUR VISIT:, look for HOURS
+    const hoursMatch = clean.match(/HOURS\s+/i);
+    if (hoursMatch) {
+      const hoursStart = hoursMatch.index;
+      const searchArea = clean.substring(hoursStart + 6);
+      const descStartMatch = searchArea.match(/[A-Z][a-z]+/);
+      if (descStartMatch) {
+        const descStart = hoursStart + 6 + descStartMatch.index;
+        clean = clean.substring(descStart).trim();
+      }
+    }
+  }
+  
+  // 3. Remove leading line separators, underscores, or stray characters
+  clean = clean.replace(/^[_\s\-\u2014\n\r]+/, "");
+  
+  // 4. Fallback if cleanup left us with almost nothing
+  if (clean.length < 50) {
+    return text.trim();
+  }
+  
+  return clean;
+}
+
+/* ==========================================================================
    Details Drawer Control
    ========================================================================== */
 function selectPark(park, marker) {
@@ -249,7 +303,8 @@ function selectPark(park, marker) {
   }
 
   // Description text
-  const desc = park.description_text || park.campground_text || "No description available.";
+  const rawDesc = park.description_text || park.campground_text || "No description available.";
+  const desc = cleanDescription(rawDesc, park.park_name);
   document.getElementById("drawer-desc").textContent = desc;
 
   // Detail Cards Grid
