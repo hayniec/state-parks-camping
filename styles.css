@@ -150,16 +150,32 @@ h1, h2, h3, h4, .brand-logo {
   gap: 8px;
 }
 
-.brand-badge {
-  font-size: 10px;
+.state-select {
+  background: var(--bg-input);
+  border: 1px solid var(--border-light);
+  color: var(--color-primary-light);
+  font-family: 'Outfit', sans-serif;
+  font-size: 11px;
   font-weight: 600;
-  background: rgba(192, 95, 48, 0.15);
-  color: var(--color-primary);
-  border: 1px solid var(--border-glow);
-  padding: 2px 8px;
   border-radius: var(--radius-round);
+  padding: 4px 28px 4px 12px;
+  cursor: pointer;
+  outline: none;
   text-transform: uppercase;
+  letter-spacing: 0.05em;
+  transition: all 0.2s ease;
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml;utf8,<svg fill='%2366e0ff' height='12' viewBox='0 0 24 24' width='12' xmlns='http://www.w3.org/2000/svg'><path d='M7 10l5 5 5-5z'/><path d='M0 0h24v24H0z' fill='none'/></svg>");
+  background-repeat: no-repeat;
+  background-position: right 8px center;
 }
+
+.state-select:hover {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 8px var(--border-glow);
+}
+
 
 .nav-actions {
   display: flex;

@@ -22,9 +22,34 @@ const TILE_URL = "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
 const TILE_ATTR =
   '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>';
 
-// Default map center: Alabama geographical center
-const ALABAMA_CENTER = [32.806671, -86.79113];
-const DEFAULT_ZOOM = 7.5;
+// State configurations: Centers, default zoom levels, and CSV filenames
+const STATE_CONFIG = {
+  AL: {
+    name: "Alabama",
+    center: [32.806671, -86.79113],
+    zoom: 7.5,
+    csv: "alabama_state_parks.csv"
+  },
+  AK: {
+    name: "Alaska",
+    center: [63.588753, -154.493062],
+    zoom: 4.5,
+    csv: "alaska_state_parks.csv"
+  },
+  AZ: {
+    name: "Arizona",
+    center: [34.048928, -111.093731],
+    zoom: 7.0,
+    csv: "arizona_state_parks.csv"
+  },
+  AR: {
+    name: "Arkansas",
+    center: [34.799999, -92.199997],
+    zoom: 7.5,
+    csv: "arkansas_state_parks.csv"
+  }
+};
+let activeState = "AL";
 
 /* ==========================================================================
    Map & Application Initialization
@@ -36,11 +61,12 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 function initMap() {
+  const config = STATE_CONFIG[activeState];
   // Initialize Leaflet Map
   map = L.map("map", {
     zoomControl: true,
     tap: false, // Prevents mobile touch double-tap delay issues
-  }).setView(ALABAMA_CENTER, DEFAULT_ZOOM);
+  }).setView(config.center, config.zoom);
 
   // Add Dark Map Tile Layer
   L.tileLayer(TILE_URL, {
@@ -56,18 +82,19 @@ function initMap() {
    Data Fetching & Parsing
    ========================================================================== */
 function loadParkData() {
-  Papa.parse("alabama_state_parks.csv", {
+  const config = STATE_CONFIG[activeState];
+  Papa.parse(config.csv, {
     download: true,
     header: true,
     dynamicTyping: true,
     skipEmptyLines: true,
     complete: function (results) {
       allParks = results.data;
-      console.log(`Loaded ${allParks.length} parks from CSV.`);
+      console.log(`Loaded ${allParks.length} parks from ${config.csv}.`);
       applyFilters(); // Initial render
     },
     error: function (error) {
-      console.error("Error reading alabama_state_parks.csv:", error);
+      console.error(`Error reading ${config.csv}:`, error);
     },
   });
 }
@@ -611,6 +638,20 @@ function setupUIEventListeners() {
     document.querySelectorAll(".chip-label").forEach(chip => chip.classList.remove("active"));
 
     applyFilters();
+  });
+
+  // State Select Dropdown Listener
+  const stateSelect = document.getElementById("state-select");
+  stateSelect.addEventListener("change", () => {
+    activeState = stateSelect.value;
+    closeDetailDrawer();
+    
+    // Smoothly pan and zoom map to the new state
+    const config = STATE_CONFIG[activeState];
+    map.setView(config.center, config.zoom);
+    
+    // Fetch and load the selected state's campgrounds CSV
+    loadParkData();
   });
 
   // Re-render Lucide icons initially
