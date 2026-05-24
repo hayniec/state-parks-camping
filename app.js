@@ -235,7 +235,6 @@ function applyFilters() {
   renderMarkers(filtered);
   renderListView(filtered);
 }
-}
 
 /* ==========================================================================
    Helper: Calculate distance between two coordinates in miles (Haversine)
