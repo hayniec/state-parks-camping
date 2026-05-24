@@ -1,5 +1,5 @@
 // Force cache flush when app version changes
-const CURRENT_VERSION = "stateparked-v9";
+const CURRENT_VERSION = "stateparked-v10";
 if (localStorage.getItem("app_version") !== CURRENT_VERSION) {
   localStorage.setItem("app_version", CURRENT_VERSION);
   if ("caches" in window) {
@@ -161,7 +161,7 @@ function initMap() {
    Data Fetching & Parsing
    ========================================================================== */
 function loadParkData() {
-  const unifiedCsv = "all_state_parks.csv?v=9";
+  const unifiedCsv = "all_state_parks.csv?v=10";
   Papa.parse(unifiedCsv, {
     download: true,
     header: true,
@@ -733,7 +733,7 @@ function selectPark(park, marker) {
   // Actions
   const btnReserve = document.getElementById("btn-reserve");
   
-  let targetUrl = park.reservation_url;
+  let targetUrl = park.reservation_url || park.park_url;
   let buttonLabel = "Reserve / Park Info";
 
   if (park.state !== "AL") {
@@ -1070,7 +1070,7 @@ function renderListView(parks) {
       
       <div class="camp-card-actions">
         ${(park.reservation_url || park.park_url) ? `
-          <a href="${park.state === 'AL' ? park.reservation_url : (park.park_url || park.reservation_url)}" target="_blank" class="btn btn-primary stop-propagation">
+          <a href="${park.state === 'AL' ? (park.reservation_url || park.park_url) : (park.park_url || park.reservation_url)}" target="_blank" class="btn btn-primary stop-propagation">
             <i data-lucide="calendar-check" style="width: 14px; height: 14px;"></i> Reserve / Info
           </a>
         ` : ''}
