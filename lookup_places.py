@@ -69,6 +69,11 @@ def main() -> int:
         description="Lookup Google Place details for state parks."
     )
     parser.add_argument(
+        "--csv",
+        default="alabama_state_parks.csv",
+        help="Path to the CSV file (defaults to alabama_state_parks.csv).",
+    )
+    parser.add_argument(
         "--force",
         action="store_true",
         help="Force lookup even if Google Place ID is already populated.",
@@ -76,6 +81,8 @@ def main() -> int:
     args = parser.parse_args()
 
     api_key = os.environ.get("GOOGLE_MAPS_API_KEY")
+    csv_path = args.csv
+    backup_path = csv_path + ".bak"
     
     # 1. Fallback to .env file if key not in environment
     if not api_key and os.path.exists(".env"):
@@ -106,14 +113,14 @@ def main() -> int:
             print("\nCancelled by user.", file=sys.stderr)
             return 1
 
-    if not os.path.exists(CSV_PATH):
-        print(f"Error: {CSV_PATH} not found. Please run the scraper first.", file=sys.stderr)
+    if not os.path.exists(csv_path):
+        print(f"Error: {csv_path} not found.", file=sys.stderr)
         return 1
 
 
     # Read CSV
     records = []
-    with open(CSV_PATH, "r", encoding="utf-8") as f:
+    with open(csv_path, "r", encoding="utf-8") as f:
         reader = csv.DictReader(f)
         fieldnames = reader.fieldnames
         for row in reader:
@@ -131,7 +138,7 @@ def main() -> int:
     ]
     for field in required_fields:
         if field not in fieldnames:
-            print(f"Error: CSV header is missing the '{field}' column. Please check your scraper schema.", file=sys.stderr)
+            print(f"Error: CSV header is missing the '{field}' column.", file=sys.stderr)
             return 1
 
     updated_count = 0
@@ -140,16 +147,28 @@ def main() -> int:
 
     print("Starting Google Places lookup...")
 
+    states = {
+        "AL": "Alabama",
+        "AK": "Alaska",
+        "AZ": "Arizona",
+        "AR": "Arkansas",
+        "CA": "California",
+        "CO": "Colorado",
+        "CT": "Connecticut"
+    }
+
     for row in records:
         name = row.get("park_name", "")
         place_id = row.get("google_place_id", "")
+        state_abbr = row.get("state", "AL")
 
         # Skip if already looked up and not forcing
         if not args.force and place_id:
             skipped_count += 1
             continue
 
-        query = f"{name}, Alabama"
+        state_name = states.get(state_abbr, "Alabama")
+        query = f"{name}, {state_name}"
         print(f"Searching Places API for '{name}' (query: '{query}')...")
 
         res_id, rating, count = lookup_place(query, api_key)
@@ -162,7 +181,6 @@ def main() -> int:
             )
 
             # Construct official deep link
-            # https://www.google.com/maps/search/?api=1&query=Park+Name&query_place_id=place_id
             encoded_name = urllib.parse.quote_plus(name)
             row["google_maps_url"] = (
                 f"https://www.google.com/maps/search/?api=1"
@@ -176,16 +194,16 @@ def main() -> int:
             failed_count += 1
 
     if updated_count > 0:
-        print(f"Backing up {CSV_PATH} to {BACKUP_PATH}...")
-        shutil.copyfile(CSV_PATH, BACKUP_PATH)
+        print(f"Backing up {csv_path} to {backup_path}...")
+        shutil.copyfile(csv_path, backup_path)
 
         # Write updated CSV
-        with open(CSV_PATH, "w", newline="", encoding="utf-8") as f:
+        with open(csv_path, "w", newline="", encoding="utf-8") as f:
             writer = csv.DictWriter(f, fieldnames=fieldnames)
             writer.writeheader()
             writer.writerows(records)
 
-        print(f"Successfully updated {updated_count} records in {CSV_PATH}.")
+        print(f"Successfully updated {updated_count} records in {csv_path}.")
     else:
         print("No records were updated.")
 

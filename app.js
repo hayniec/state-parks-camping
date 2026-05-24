@@ -1,10 +1,53 @@
+// Force cache flush when app version changes
+const CURRENT_VERSION = "stateparked-v9";
+if (localStorage.getItem("app_version") !== CURRENT_VERSION) {
+  localStorage.setItem("app_version", CURRENT_VERSION);
+  if ("caches" in window) {
+    caches.keys().then((names) => {
+      Promise.all(names.map(name => caches.delete(name))).then(() => {
+        if ("serviceWorker" in navigator) {
+          navigator.serviceWorker.getRegistrations().then((registrations) => {
+            Promise.all(registrations.map(r => r.unregister())).then(() => {
+              window.location.reload(true);
+            });
+          });
+        } else {
+          window.location.reload(true);
+        }
+      });
+    });
+  }
+}
+
 // Register Service Worker for PWA Offline support
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", () => {
     navigator.serviceWorker
       .register("./sw.js")
-      .then((reg) => console.log("Service Worker registered successfully!"))
+      .then((reg) => {
+        console.log("Service Worker registered successfully!");
+        reg.onupdatefound = () => {
+          const installingWorker = reg.installing;
+          if (installingWorker) {
+            installingWorker.onstatechange = () => {
+              if (installingWorker.state === "installed" && navigator.serviceWorker.controller) {
+                console.log("New content available, reloading...");
+                window.location.reload();
+              }
+            };
+          }
+        };
+      })
       .catch((err) => console.warn("Service Worker registration failed:", err));
+  });
+
+  // Automatically reload the page when the active service worker changes (e.g., after skipWaiting)
+  let refreshing = false;
+  navigator.serviceWorker.addEventListener("controllerchange", () => {
+    if (!refreshing) {
+      refreshing = true;
+      window.location.reload();
+    }
   });
 }
 
@@ -19,13 +62,21 @@ let selectedPark = null;
 let userCoords = null;
 let userLocationMarker = null;
 
-// CartoDB Dark Matter Tile Layer
-const TILE_URL = "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png";
+// CartoDB Tile Layers (Dark Matter and Positron Light)
+const TILE_URL_DARK = "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png";
+const TILE_URL_LIGHT = "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png";
 const TILE_ATTR =
   '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>';
+let tileLayerInstance;
 
 // State configurations: Centers, default zoom levels, and CSV filenames
 const STATE_CONFIG = {
+  ALL: {
+    name: "All States",
+    center: [39.8283, -98.5795],
+    zoom: 4.0,
+    csv: "all_state_parks.csv"
+  },
   AL: {
     name: "Alabama",
     center: [32.806671, -86.79113],
@@ -49,14 +100,37 @@ const STATE_CONFIG = {
     center: [34.799999, -92.199997],
     zoom: 7.5,
     csv: "arkansas_state_parks.csv"
+  },
+  CA: {
+    name: "California",
+    center: [36.7783, -119.4179],
+    zoom: 6.0,
+    csv: "california_state_parks.csv"
+  },
+  CO: {
+    name: "Colorado",
+    center: [39.5501, -105.7821],
+    zoom: 7.0,
+    csv: "colorado_state_parks.csv"
+  },
+  CT: {
+    name: "Connecticut",
+    center: [41.6032, -72.6999],
+    zoom: 9.0,
+    csv: "connecticut_state_parks.csv"
   }
 };
-let activeState = "AL";
+let activeState = "ALL";
 
 /* ==========================================================================
    Map & Application Initialization
    ========================================================================== */
 document.addEventListener("DOMContentLoaded", () => {
+  // Load saved accessibility mode before initializing layout/map
+  if (localStorage.getItem("accessibilityMode") === "enabled") {
+    document.body.classList.add("high-contrast");
+  }
+  
   initMap();
   setupUIEventListeners();
   loadParkData();
@@ -70,8 +144,11 @@ function initMap() {
     tap: false, // Prevents mobile touch double-tap delay issues
   }).setView(config.center, config.zoom);
 
-  // Add Dark Map Tile Layer
-  L.tileLayer(TILE_URL, {
+  // Set correct tile layer based on accessibility setting
+  const isHighContrast = document.body.classList.contains("high-contrast");
+  const tileUrl = isHighContrast ? TILE_URL_LIGHT : TILE_URL_DARK;
+
+  tileLayerInstance = L.tileLayer(tileUrl, {
     attribution: TILE_ATTR,
     maxZoom: 19,
   }).addTo(map);
@@ -84,19 +161,19 @@ function initMap() {
    Data Fetching & Parsing
    ========================================================================== */
 function loadParkData() {
-  const config = STATE_CONFIG[activeState];
-  Papa.parse(config.csv, {
+  const unifiedCsv = "all_state_parks.csv?v=9";
+  Papa.parse(unifiedCsv, {
     download: true,
     header: true,
     dynamicTyping: true,
     skipEmptyLines: true,
     complete: function (results) {
       allParks = results.data;
-      console.log(`Loaded ${allParks.length} parks from ${config.csv}.`);
+      console.log(`Loaded ${allParks.length} parks from ${unifiedCsv}.`);
       applyFilters(); // Initial render
     },
     error: function (error) {
-      console.error(`Error reading ${config.csv}:`, error);
+      console.error(`Error reading ${unifiedCsv}:`, error);
     },
   });
 }
@@ -130,7 +207,7 @@ function renderMarkers(parks) {
     
     // Bind popup label on hover/click
     marker.bindPopup(`
-      <div class="popup-subtitle">Alabama State Park</div>
+      <div class="popup-subtitle">${STATE_CONFIG[park.state]?.name || park.state} State Park</div>
       <div class="popup-title">${park.park_name}</div>
     `, {
       closeButton: false,
@@ -191,6 +268,9 @@ function applyFilters() {
 
   // Filter list
   const filtered = allParks.filter((park) => {
+    // State Filter
+    if (activeState !== "ALL" && park.state !== activeState) return false;
+
     // Camping Toggles
     if (filterRv && park.has_rv_camping !== true && park.has_rv_camping !== "True") return false;
     if (filterTent && park.has_tent_camping !== true && park.has_tent_camping !== "True") return false;
@@ -289,6 +369,7 @@ function locateUser() {
       let closestState = activeState;
       let minDistance = Infinity;
       for (const [code, state] of Object.entries(STATE_CONFIG)) {
+        if (code === "ALL") continue; // Skip national configuration
         const dist = calculateDistance(lat, lng, state.center[0], state.center[1]);
         if (dist < minDistance) {
           minDistance = dist;
@@ -300,7 +381,7 @@ function locateUser() {
       if (closestState !== activeState) {
         activeState = closestState;
         document.getElementById("state-select").value = activeState;
-        loadParkData();
+        applyFilters();
       }
 
       // Smoothly pan and zoom map to user's location
@@ -431,7 +512,7 @@ function selectPark(park, marker) {
 
   // Populate Slide-up Detail Drawer UI
   document.getElementById("drawer-park-name").textContent = park.park_name;
-  document.getElementById("drawer-slug").textContent = park.park_slug.replace(/-/g, " ");
+  document.getElementById("drawer-slug").textContent = `${STATE_CONFIG[park.state]?.name || park.state} State Park`;
 
   // Ratings block
   const rating = parseFloat(park.google_rating);
@@ -651,9 +732,20 @@ function selectPark(park, marker) {
 
   // Actions
   const btnReserve = document.getElementById("btn-reserve");
-  if (park.reservation_url) {
+  
+  let targetUrl = park.reservation_url;
+  let buttonLabel = "Reserve / Park Info";
+
+  if (park.state !== "AL") {
+    // For states other than Alabama, direct search/reservation links often fail with 403/404 session timeouts.
+    // Route users to the official state park details page where bookings can be safely initiated.
+    targetUrl = park.park_url || park.reservation_url;
+  }
+
+  if (targetUrl) {
     btnReserve.classList.remove("hidden");
-    btnReserve.href = park.reservation_url;
+    btnReserve.href = targetUrl;
+    btnReserve.innerHTML = `<i data-lucide="calendar-check"></i> ${buttonLabel}`;
   } else {
     btnReserve.classList.add("hidden");
   }
@@ -701,6 +793,26 @@ function closeDetailDrawer() {
    UI Controls & Event Handlers
    ========================================================================== */
 function setupUIEventListeners() {
+  // Accessibility Contrast Mode Toggle
+  const btnToggleAccess = document.getElementById("btn-toggle-accessibility");
+  if (document.body.classList.contains("high-contrast")) {
+    btnToggleAccess.classList.add("active");
+  }
+
+  btnToggleAccess.addEventListener("click", () => {
+    const isHC = document.body.classList.toggle("high-contrast");
+    btnToggleAccess.classList.toggle("active", isHC);
+    
+    // Dynamically swap Leaflet tile layer URL
+    const newTileUrl = isHC ? TILE_URL_LIGHT : TILE_URL_DARK;
+    if (tileLayerInstance) {
+      tileLayerInstance.setUrl(newTileUrl);
+    }
+    
+    // Persist user selection
+    localStorage.setItem("accessibilityMode", isHC ? "enabled" : "disabled");
+  });
+
   // Drawer Toggles
   const btnToggleFilter = document.getElementById("btn-toggle-filter");
   const filterPanel = document.getElementById("filter-panel");
@@ -805,8 +917,8 @@ function setupUIEventListeners() {
     const config = STATE_CONFIG[activeState];
     map.setView(config.center, config.zoom);
     
-    // Fetch and load the selected state's campgrounds CSV
-    loadParkData();
+    // Apply filters locally on the already loaded master dataset
+    applyFilters();
   });
 
   // Locate Me Button Listener
@@ -957,9 +1069,9 @@ function renderListView(parks) {
       ${accBadgesHtml ? `<div class="camp-card-acc">${accBadgesHtml}</div>` : ''}
       
       <div class="camp-card-actions">
-        ${park.reservation_url ? `
-          <a href="${park.reservation_url}" target="_blank" class="btn btn-primary stop-propagation">
-            <i data-lucide="calendar-check" style="width: 14px; height: 14px;"></i> Book Campsite
+        ${(park.reservation_url || park.park_url) ? `
+          <a href="${park.state === 'AL' ? park.reservation_url : (park.park_url || park.reservation_url)}" target="_blank" class="btn btn-primary stop-propagation">
+            <i data-lucide="calendar-check" style="width: 14px; height: 14px;"></i> Reserve / Info
           </a>
         ` : ''}
         <button class="btn stop-propagation btn-view-on-map">

@@ -34,7 +34,7 @@ OSM_DELAY_SECONDS = 1.0
 GOOGLE_DELAY_SECONDS = 0.1
 
 
-def geocode_osm(address: str, park_name: str) -> Tuple[Optional[float], Optional[float]]:
+def geocode_osm(address: str, park_name: str, state_name: str) -> Tuple[Optional[float], Optional[float]]:
     """Geocode using OpenStreetMap's Nominatim API."""
     url = "https://nominatim.openstreetmap.org/search"
     headers = {"User-Agent": USER_AGENT}
@@ -52,7 +52,7 @@ def geocode_osm(address: str, park_name: str) -> Tuple[Optional[float], Optional
         print(f"    [warn] OSM geocoding error for '{address}': {e}", file=sys.stderr)
 
     # Attempt 2: Park Name + State
-    query_fallback = f"{park_name}, Alabama"
+    query_fallback = f"{park_name}, {state_name}"
     params = {"q": query_fallback, "format": "json", "limit": 1}
     try:
         time.sleep(OSM_DELAY_SECONDS)
@@ -68,7 +68,7 @@ def geocode_osm(address: str, park_name: str) -> Tuple[Optional[float], Optional
     return None, None
 
 
-def geocode_google(address: str, park_name: str, api_key: str) -> Tuple[Optional[float], Optional[float]]:
+def geocode_google(address: str, park_name: str, state_name: str, api_key: str) -> Tuple[Optional[float], Optional[float]]:
     """Geocode using Google Geocoding API."""
     url = "https://maps.googleapis.com/maps/api/geocode/json"
 
@@ -86,7 +86,7 @@ def geocode_google(address: str, park_name: str, api_key: str) -> Tuple[Optional
         print(f"    [warn] Google geocoding error for '{address}': {e}", file=sys.stderr)
 
     # Attempt 2: Park Name + State
-    query_fallback = f"{park_name}, Alabama"
+    query_fallback = f"{park_name}, {state_name}"
     params = {"address": query_fallback, "key": api_key}
     try:
         time.sleep(GOOGLE_DELAY_SECONDS)
@@ -106,6 +106,11 @@ def geocode_google(address: str, park_name: str, api_key: str) -> Tuple[Optional
 def main() -> int:
     parser = argparse.ArgumentParser(description="Geocode park addresses in CSV.")
     parser.add_argument(
+        "--csv",
+        default="alabama_state_parks.csv",
+        help="Path to the CSV file to geocode (defaults to alabama_state_parks.csv).",
+    )
+    parser.add_argument(
         "--force",
         action="store_true",
         help="Re-geocode even if coordinates already exist.",
@@ -117,8 +122,25 @@ def main() -> int:
     )
     args = parser.parse_args()
 
+    csv_path = args.csv
+    backup_path = csv_path + ".bak"
+
     # Determine service and API key
     google_key = os.environ.get("GOOGLE_MAPS_API_KEY")
+    if not google_key and os.path.exists(".env"):
+        try:
+            with open(".env", "r", encoding="utf-8") as f:
+                for line in f:
+                    if line.strip() and not line.strip().startswith("#"):
+                        parts = line.strip().split("=", 1)
+                        if len(parts) == 2 and parts[0].strip() == "GOOGLE_MAPS_API_KEY":
+                            google_key = parts[1].strip().strip('"').strip("'")
+                            break
+            if google_key:
+                print("Loaded GOOGLE_MAPS_API_KEY from .env file.")
+        except Exception as e:
+            print(f"Warning: Could not read .env file: {e}", file=sys.stderr)
+            
     service = args.service
 
     if not service:
@@ -133,13 +155,13 @@ def main() -> int:
 
     print(f"Using geocoding service: {service.upper()}")
 
-    if not os.path.exists(CSV_PATH):
-        print(f"Error: {CSV_PATH} not found. Please run the scraper first.", file=sys.stderr)
+    if not os.path.exists(csv_path):
+        print(f"Error: {csv_path} not found.", file=sys.stderr)
         return 1
 
     # Read records
     records = []
-    with open(CSV_PATH, "r", encoding="utf-8") as f:
+    with open(csv_path, "r", encoding="utf-8") as f:
         reader = csv.DictReader(f)
         fieldnames = reader.fieldnames
         for row in reader:
@@ -152,8 +174,18 @@ def main() -> int:
     # Ensure latitude and longitude columns exist in header
     for field in ["latitude", "longitude"]:
         if field not in fieldnames:
-            print(f"Error: CSV header is missing the '{field}' column. Please check your scraper schema.", file=sys.stderr)
+            print(f"Error: CSV header is missing the '{field}' column.", file=sys.stderr)
             return 1
+
+    states = {
+        "AL": "Alabama",
+        "AK": "Alaska",
+        "AZ": "Arizona",
+        "AR": "Arkansas",
+        "CA": "California",
+        "CO": "Colorado",
+        "CT": "Connecticut"
+    }
 
     # Geocode each park
     updated_count = 0
@@ -165,6 +197,8 @@ def main() -> int:
         address = row.get("address", "")
         lat_str = row.get("latitude", "")
         lon_str = row.get("longitude", "")
+        state_abbr = row.get("state", "AL")
+        state_name = states.get(state_abbr, "Alabama")
 
         # Skip if already geocoded (and not forcing)
         if not args.force and lat_str and lon_str:
@@ -179,9 +213,9 @@ def main() -> int:
         print(f"Geocoding '{name}' -> Address: '{address}'")
 
         if service == "google" and google_key:
-            lat, lon = geocode_google(address, name, google_key)
+            lat, lon = geocode_google(address, name, state_name, google_key)
         else:
-            lat, lon = geocode_osm(address, name)
+            lat, lon = geocode_osm(address, name, state_name)
 
         if lat is not None and lon is not None:
             row["latitude"] = str(lat)
@@ -194,16 +228,16 @@ def main() -> int:
 
     if updated_count > 0:
         # Create a backup of the original CSV file
-        print(f"Backing up {CSV_PATH} to {BACKUP_PATH}...")
-        shutil.copyfile(CSV_PATH, BACKUP_PATH)
+        print(f"Backing up {csv_path} to {backup_path}...")
+        shutil.copyfile(csv_path, backup_path)
 
         # Write updated CSV
-        with open(CSV_PATH, "w", newline="", encoding="utf-8") as f:
+        with open(csv_path, "w", newline="", encoding="utf-8") as f:
             writer = csv.DictWriter(f, fieldnames=fieldnames)
             writer.writeheader()
             writer.writerows(records)
 
-        print(f"Successfully updated {updated_count} records in {CSV_PATH}.")
+        print(f"Successfully updated {updated_count} records in {csv_path}.")
     else:
         print("No records were updated.")
 

@@ -1,13 +1,10 @@
-const CACHE_NAME = "campal-v4";
+const CACHE_NAME = "stateparked-v9";
 const ASSETS = [
   "./",
   "./index.html",
-  "./styles.css",
-  "./app.js",
-  "./alabama_state_parks.csv",
-  "./alaska_state_parks.csv",
-  "./arizona_state_parks.csv",
-  "./arkansas_state_parks.csv",
+  "./styles.css?v=9",
+  "./app.js?v=9",
+  "./all_state_parks.csv?v=9",
   "https://unpkg.com/leaflet@1.9.4/dist/leaflet.css",
   "https://unpkg.com/leaflet@1.9.4/dist/leaflet.js",
   "https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js",

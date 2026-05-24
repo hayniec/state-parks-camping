@@ -59,4 +59,4 @@ Most official systems are managed by state Departments of Natural Resources (DNR
 
 ---
 
-*Compiled by CampAL Campground Discovery Project.*
+*Compiled by StateParked Campground Discovery Project.*

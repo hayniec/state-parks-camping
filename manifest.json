@@ -1,7 +1,7 @@
 {
-  "short_name": "CampAL",
-  "name": "Alabama Camp Discovery",
-  "description": "Interactive map for discovering and filtering RV and tent state park campgrounds in Alabama.",
+  "short_name": "StateParked",
+  "name": "StateParked Campground Discovery",
+  "description": "Interactive map for discovering and filtering RV and tent campgrounds in State Parks.",
   "icons": [
     {
       "src": "icon-192.png",

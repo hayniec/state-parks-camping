@@ -1,5 +1,5 @@
 /* ==========================================================================
-   CampAL Custom Design System
+   StateParked Custom Design System
    ========================================================================== */
 
 /* Typography & Variables */
@@ -17,12 +17,13 @@
   --color-primary-light: hsl(188, 100%, 70%);
   --color-accent: hsl(265, 90%, 60%);
   
+  /* Enhanced Base Contrast (508 Compliant dark-mode text ratios) */
   --text-primary: hsl(210, 20%, 98%);
-  --text-secondary: hsl(215, 12%, 75%);
-  --text-muted: hsl(215, 8%, 52%);
+  --text-secondary: hsl(215, 15%, 85%);
+  --text-muted: hsl(215, 12%, 65%);
   
   --border-glow: hsla(192, 95%, 48%, 0.25);
-  --border-light: hsla(210, 20%, 98%, 0.08);
+  --border-light: hsla(210, 20%, 98%, 0.12);
   --border-focus: hsla(192, 95%, 48%, 0.6);
   
   --success: hsl(145, 80%, 42%);
@@ -50,6 +51,40 @@
   --safe-bottom: env(safe-area-inset-bottom, 0px);
   --safe-left: env(safe-area-inset-left, 0px);
   --safe-right: env(safe-area-inset-right, 0px);
+}
+
+/* High Contrast Theme Variables (508 Compliant Light Mode) */
+body.high-contrast {
+  --bg-base: #ffffff;
+  --bg-surface: #f1f3f5;
+  --bg-card: #ffffff;
+  --bg-input: #ffffff;
+  
+  --color-primary: #005a9c; /* Accessible Dark Blue */
+  --color-primary-dark: #003a6c;
+  --color-primary-light: #004b82;
+  --color-accent: #5c06a1; /* Dark Violet */
+  
+  --text-primary: #111111; /* Pure Dark Gray */
+  --text-secondary: #2c2c2c;
+  --text-muted: #4b4b4b;
+  
+  --border-glow: rgba(0, 90, 156, 0.4);
+  --border-light: #767676; /* Standard accessible border color */
+  --border-focus: #000000;
+  
+  --success: #006600; /* Darker green */
+  --success-glow: rgba(0, 102, 0, 0.1);
+  --warning: #b36b00; /* Darker amber */
+  --error: #cc0000; /* Darker red */
+  
+  --gradient-primary: linear-gradient(135deg, #005a9c, #5c06a1);
+  --gradient-surface: linear-gradient(180deg, #ffffff, #f8f9fa);
+  
+  --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.15);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.2);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.25);
+  --shadow-glow: none;
 }
 
 /* Reset & Core Setup */
@@ -1268,6 +1303,186 @@ h1, h2, h3, h4, .brand-logo {
   background: var(--bg-card);
   border: 1px solid var(--border-light);
   border-radius: var(--radius-md);
+}
+
+/* ==========================================================================
+   Section 508 Accessibility overrides
+   ========================================================================== */
+
+/* Focus outlines for keyboard navigation accessibility */
+button:focus-visible,
+select:focus-visible,
+input:focus-visible,
+a:focus-visible,
+.camp-type-card:focus-visible,
+.chip-label:focus-visible {
+  outline: 3px solid var(--color-primary) !important;
+  outline-offset: 2px !important;
+  box-shadow: 0 0 0 5px rgba(0, 242, 254, 0.2) !important;
+}
+
+body.high-contrast button:focus-visible,
+body.high-contrast select:focus-visible,
+body.high-contrast input:focus-visible,
+body.high-contrast a:focus-visible,
+body.high-contrast .camp-type-card:focus-visible,
+body.high-contrast .chip-label:focus-visible {
+  outline: 3px solid #000000 !important;
+  outline-offset: 2px !important;
+  box-shadow: 0 0 0 5px rgba(0, 0, 0, 0.2) !important;
+}
+
+/* High Contrast adjustments for leaflet map controls and widgets */
+body.high-contrast .leaflet-control-attribution {
+  background: rgba(255, 255, 255, 0.9) !important;
+  color: #111111 !important;
+  border-left: 1px solid #767676;
+  border-top: 1px solid #767676;
+}
+
+body.high-contrast .leaflet-control-attribution a {
+  color: #005a9c !important;
+  text-decoration: underline;
+}
+
+/* Custom focus support for map zoom controls */
+body.high-contrast .leaflet-bar a:focus-visible {
+  outline: 3px solid #000000 !important;
+  outline-offset: -2px !important;
+}
+
+/* Custom Accessibility mode visual overrides */
+body.high-contrast .glass {
+  background: var(--bg-card) !important;
+  border: 2px solid #000000 !important;
+  box-shadow: none !important;
+}
+
+body.high-contrast .top-nav {
+  border: 2px solid #000000 !important;
+  box-shadow: none !important;
+}
+
+body.high-contrast .btn:not(.btn-primary) {
+  border: 2px solid #000000 !important;
+  color: #111111 !important;
+  font-weight: 600;
+  box-shadow: none !important;
+}
+
+body.high-contrast .btn-primary {
+  background: #005a9c !important;
+  color: #ffffff !important;
+  border: 2px solid #000000 !important;
+  font-weight: 700;
+}
+
+body.high-contrast .btn-primary:hover {
+  background: #003a6c !important;
+  box-shadow: none !important;
+}
+
+body.high-contrast .camp-type-card {
+  border: 2px solid #767676 !important;
+}
+
+body.high-contrast .camp-type-card.active {
+  border: 3px solid #005a9c !important;
+  background: rgba(0, 90, 156, 0.08) !important;
+}
+
+body.high-contrast .chip-label {
+  border: 2px solid #767676 !important;
+}
+
+body.high-contrast .chip-label.active {
+  border: 3px solid #005a9c !important;
+  background: rgba(0, 90, 156, 0.08) !important;
+}
+
+body.high-contrast .state-select {
+  border: 2px solid #000000 !important;
+  color: #005a9c !important;
+  background-color: #ffffff !important;
+  background-image: url("data:image/svg+xml;utf8,<svg fill='%23005a9c' height='12' viewBox='0 0 24 24' width='12' xmlns='http://www.w3.org/2000/svg'><path d='M7 10l5 5 5-5z'/><path d='M0 0h24v24H0z' fill='none'/></svg>") !important;
+}
+
+body.high-contrast .camp-card {
+  border: 2px solid #767676 !important;
+  background: #ffffff !important;
+  box-shadow: none !important;
+}
+
+body.high-contrast .detail-card {
+  border: 2px solid #767676 !important;
+  background: #f1f3f5 !important;
+}
+
+body.high-contrast .badge-item {
+  border: 2px solid #767676 !important;
+  background: #ffffff !important;
+  color: #2c2c2c !important;
+}
+
+body.high-contrast .badge-item.active {
+  background: #d4edda !important;
+  color: #155724 !important;
+  border-color: #c3e6cb !important;
+}
+
+body.high-contrast .badge-item.accessibility-active {
+  background: #cce5ff !important;
+  color: #004085 !important;
+  border-color: #b8daff !important;
+}
+
+body.high-contrast .badge-item.activity {
+  background: #e2e3e5 !important;
+  color: #383d41 !important;
+  border-color: #d6d8db !important;
+}
+
+body.high-contrast .detail-drawer-header {
+  border-bottom: 2px solid #000000 !important;
+}
+
+body.high-contrast .detail-drawer-header::before {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.4) 0%, rgba(255, 255, 255, 0.95) 100%) !important;
+}
+
+body.high-contrast .header-park-name {
+  color: #111111 !important;
+  font-weight: 700;
+}
+
+body.high-contrast .header-subtitle {
+  color: #005a9c !important;
+  font-weight: 700;
+}
+
+body.high-contrast .detail-actions {
+  background: #ffffff !important;
+  border-top: 2px solid #000000 !important;
+}
+
+body.high-contrast .view-switch {
+  background: #f1f3f5 !important;
+  border: 2px solid #000000 !important;
+}
+
+body.high-contrast .btn-switch.active {
+  background: #005a9c !important;
+  color: #ffffff !important;
+}
+
+body.high-contrast .btn-switch:not(.active) {
+  color: #555555 !important;
+}
+
+body.high-contrast .btn-icon.active {
+  background: #005a9c !important;
+  color: #ffffff !important;
+  border-color: #000000 !important;
 }
 
 

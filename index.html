@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <title>CampAL - Alabama Campground Discovery</title>
+  <title>StateParked - State Park Campground Discovery</title>
   
   <!-- PWA Manifest -->
   <link rel="manifest" href="manifest.json">
@@ -15,7 +15,7 @@
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   
   <!-- Custom Fonts & Styles -->
-  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="styles.css?v=9">
 </head>
 <body>
 
@@ -24,26 +24,33 @@
     <div class="brand-wrapper">
       <div class="brand-logo">
         <i data-lucide="tent"></i>
-        <span>CampAL</span>
+        <span>StateParked</span>
       </div>
-      <select id="state-select" class="state-select">
+      <select id="state-select" class="state-select" aria-label="Select US State">
+        <option value="ALL" selected>All States</option>
         <option value="AL">Alabama</option>
         <option value="AK">Alaska</option>
         <option value="AZ">Arizona</option>
         <option value="AR">Arkansas</option>
+        <option value="CA">California</option>
+        <option value="CO">Colorado</option>
+        <option value="CT">Connecticut</option>
       </select>
     </div>
     
     <div class="nav-actions">
+      <button id="btn-toggle-accessibility" class="btn btn-icon glass" title="Toggle Accessibility Mode" aria-label="Toggle High Contrast Mode">
+        <i data-lucide="accessibility"></i>
+      </button>
       <div class="view-switch glass">
-        <button id="btn-view-map" class="btn-switch active" title="Map View">
+        <button id="btn-view-map" class="btn-switch active" title="Map View" aria-label="Switch to Map View">
           <i data-lucide="map"></i>
         </button>
-        <button id="btn-view-list" class="btn-switch" title="List View">
+        <button id="btn-view-list" class="btn-switch" title="List View" aria-label="Switch to List View">
           <i data-lucide="list"></i>
         </button>
       </div>
-      <button id="btn-toggle-filter" class="btn btn-icon active">
+      <button id="btn-toggle-filter" class="btn btn-icon active" aria-label="Toggle Filters Panel">
         <i data-lucide="sliders-horizontal"></i>
       </button>
     </div>
@@ -356,7 +363,7 @@
     <!-- Action buttons footer -->
     <div class="detail-actions">
       <a href="#" target="_blank" class="btn btn-primary" id="btn-reserve">
-        <i data-lucide="calendar-check"></i> Book Campsite
+        <i data-lucide="calendar-check"></i> Reserve / Park Info
       </a>
       <a href="#" target="_blank" class="btn btn-icon" id="btn-maps" title="View on Google Maps">
         <i data-lucide="map"></i>
@@ -378,6 +385,6 @@
   <script src="https://unpkg.com/lucide@latest"></script>
   
   <!-- Application JS Controller -->
-  <script src="app.js"></script>
+  <script src="app.js?v=9"></script>
 </body>
 </html>

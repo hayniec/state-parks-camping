@@ -55,30 +55,10 @@ operations, ratings (8 dimensions: overall, site quality, hookup reliability,
 cleanliness, scenery, connectivity, noise, value), Google Places fields
 (place_id, maps URL, rating, review count), and raw text fallback.
 
-## Immediate Next Steps
+## Project Roadmap & Implementation Plan
 
-1. **Add tent camping support to the scraper:**
-   - Add `has_tent_camping`, `tent_sites_count`, `primitive_camping` fields
-     to `ParkRecord`.
-   - Extend `infer_amenities()` with tent keyword detection
-     ("primitive", "tent-only", "tent sites", "walk-in").
-   - Remove the `KNOWN_NO_RV` skip behavior — all parks should be scraped
-     since a park with no RV camping may still have tent camping.
-   - Rename the RV-specific count regex so it doesn't accidentally match
-     tent-site counts.
+The project roadmap, current active plans, and completed milestones are documented in the [Master Implementation Plan & Roadmap](file:///C:/Users/erich/.gemini/antigravity/brain/1cd0f18b-3c10-482f-9679-fb29f161c88b/implementation_plan.md).
 
-2. **Run the scraper live** against alapark.com and inspect the CSV.
-
-3. **Geocoding script** — convert addresses to lat/long so the app can do
-   "near me" search. Free options: Nominatim (OpenStreetMap) for low volume,
-   or the Google Geocoding API.
-
-4. **Google Places lookup script** — for each park, find the `place_id` via
-   the Places API text search. Store in CSV. Then a separate flow fetches
-   the live rating at app runtime.
-
-5. **First app prototype** — likely a simple React + map (Leaflet/Mapbox)
-   that reads the CSV and renders filterable markers.
 
 ## Tech Notes
 
