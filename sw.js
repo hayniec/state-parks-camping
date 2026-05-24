@@ -1,4 +1,4 @@
-const CACHE_NAME = "campal-v2";
+const CACHE_NAME = "campal-v3";
 const ASSETS = [
   "./",
   "./index.html",

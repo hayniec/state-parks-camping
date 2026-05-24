@@ -181,6 +181,14 @@ function applyFilters() {
     golf: document.getElementById("activity-golf").checked,
   };
 
+  // 4. Accessibility Toggles
+  const accessibility = {
+    ada_sites: document.getElementById("filter-ada-sites").checked,
+    ada_restrooms: document.getElementById("filter-ada-restrooms").checked,
+    ada_trails: document.getElementById("filter-ada-trails").checked,
+    ada_water_access: document.getElementById("filter-ada-water").checked,
+  };
+
   // Filter list
   const filtered = allParks.filter((park) => {
     // Camping Toggles
@@ -207,6 +215,14 @@ function applyFilters() {
 
     // Activities
     for (const [key, value] of Object.entries(activities)) {
+      if (value) {
+        const isTrue = park[key] === true || park[key] === "True";
+        if (!isTrue) return false;
+      }
+    }
+
+    // Accessibility
+    for (const [key, value] of Object.entries(accessibility)) {
       if (value) {
         const isTrue = park[key] === true || park[key] === "True";
         if (!isTrue) return false;
@@ -580,6 +596,28 @@ function selectPark(park, marker) {
   if (activitiesContainer.innerHTML === "") {
     activitiesContainer.innerHTML = `<span class="helper-text">None specified.</span>`;
   }
+
+  // Render Accessibility Chips list
+  const accessibilityList = [
+    { label: "ADA Campsites", key: "ada_sites" },
+    { label: "ADA Restrooms", key: "ada_restrooms" },
+    { label: "Paved Trails", key: "ada_trails" },
+    { label: "ADA Water Access", key: "ada_water_access" }
+  ];
+
+  const accessibilityContainer = document.getElementById("drawer-accessibility-container");
+  accessibilityContainer.innerHTML = "";
+  accessibilityList.forEach(item => {
+    const isTrue = park[item.key] === true || park[item.key] === "True";
+    const statusClass = isTrue ? "accessibility-active" : "inactive";
+    const iconName = isTrue ? "check" : "x";
+    accessibilityContainer.innerHTML += `
+      <div class="badge-item ${statusClass}">
+        <i data-lucide="${iconName}" style="width: 12px; height: 12px;"></i>
+        ${item.label}
+      </div>
+    `;
+  });
 
   // Contacts
   const address = park.address;

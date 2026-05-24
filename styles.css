@@ -738,6 +738,12 @@ h1, h2, h3, h4, .brand-logo {
   opacity: 0.65;
 }
 
+.badge-item.accessibility-active {
+  background: rgba(0, 136, 255, 0.08);
+  color: hsl(210, 100%, 65%);
+  border-color: rgba(0, 136, 255, 0.3);
+}
+
 .badge-item.activity {
   background: rgba(192, 95, 48, 0.05);
   color: var(--color-primary-light);
