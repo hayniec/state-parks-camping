@@ -35,6 +35,14 @@
     </div>
     
     <div class="nav-actions">
+      <div class="view-switch glass">
+        <button id="btn-view-map" class="btn-switch active" title="Map View">
+          <i data-lucide="map"></i>
+        </button>
+        <button id="btn-view-list" class="btn-switch" title="List View">
+          <i data-lucide="list"></i>
+        </button>
+      </div>
       <button id="btn-toggle-filter" class="btn btn-icon active">
         <i data-lucide="sliders-horizontal"></i>
       </button>
@@ -43,6 +51,9 @@
 
   <!-- Interactive Map Canvas -->
   <main id="map"></main>
+
+  <!-- List View Container -->
+  <section id="list-view" class="list-view-container hidden"></section>
 
   <!-- Floating Locate Me Button -->
   <button id="btn-locate-me" class="btn btn-icon btn-locate-me glass" title="Locate Me">

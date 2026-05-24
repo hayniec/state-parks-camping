@@ -233,6 +233,8 @@ function applyFilters() {
   });
 
   renderMarkers(filtered);
+  renderListView(filtered);
+}
 }
 
 /* ==========================================================================
@@ -460,8 +462,6 @@ function selectPark(park, marker) {
   // Update Distance Badge if user location is available
   const distanceBadge = document.getElementById("drawer-distance");
   const distanceValue = document.getElementById("drawer-distance-value");
-  const lat = parseFloat(park.latitude);
-  const lon = parseFloat(park.longitude);
 
   if (userCoords && !isNaN(lat) && !isNaN(lon)) {
     const dist = calculateDistance(userCoords[0], userCoords[1], lat, lon);
@@ -816,6 +816,201 @@ function setupUIEventListeners() {
     locateUser();
   });
 
+  // View Switcher Buttons
+  document.getElementById("btn-view-map").addEventListener("click", () => {
+    switchToView("map");
+  });
+  document.getElementById("btn-view-list").addEventListener("click", () => {
+    switchToView("list");
+  });
+
   // Re-render Lucide icons initially
+  lucide.createIcons();
+}
+
+/* ==========================================================================
+   View Switching & List View Rendering
+   ========================================================================== */
+
+function switchToView(viewName) {
+  const btnMap = document.getElementById("btn-view-map");
+  const btnList = document.getElementById("btn-view-list");
+  const mapEl = document.getElementById("map");
+  const btnLocate = document.getElementById("btn-locate-me");
+  const listEl = document.getElementById("list-view");
+  
+  if (viewName === "map") {
+    btnMap.classList.add("active");
+    btnList.classList.remove("active");
+    mapEl.classList.remove("hidden");
+    btnLocate.classList.remove("hidden");
+    listEl.classList.add("hidden");
+    
+    // Recalculate leaflet map size now that it's visible again
+    setTimeout(() => {
+      map.invalidateSize();
+    }, 100);
+  } else {
+    btnMap.classList.remove("active");
+    btnList.classList.add("active");
+    mapEl.classList.add("hidden");
+    btnLocate.classList.add("hidden");
+    listEl.classList.remove("hidden");
+  }
+}
+
+function renderListView(parks) {
+  const container = document.getElementById("list-view");
+  if (!container) return;
+  
+  container.innerHTML = "";
+  
+  if (parks.length === 0) {
+    container.innerHTML = `
+      <div class="no-results-card text-center">
+        <i data-lucide="compass" class="icon" style="width: 48px; height: 48px; margin: 0 auto 15px auto; color: var(--text-muted);"></i>
+        <h3 style="color: var(--text-primary); font-family: 'Outfit', sans-serif;">No Campsites Found</h3>
+        <p style="color: var(--text-muted); font-size: 13px; margin-top: 5px;">Adjust your filters to see more campgrounds.</p>
+      </div>
+    `;
+    lucide.createIcons();
+    return;
+  }
+  
+  parks.forEach(park => {
+    // Determine distance
+    let distanceStr = "";
+    const lat = parseFloat(park.latitude);
+    const lon = parseFloat(park.longitude);
+    if (userCoords && !isNaN(lat) && !isNaN(lon)) {
+      const dist = calculateDistance(userCoords[0], userCoords[1], lat, lon);
+      distanceStr = `<span class="distance-badge"><i data-lucide="navigation" style="width: 10px; height: 10px;"></i> ${dist.toFixed(1)} mi away</span>`;
+    }
+    
+    // Rating string
+    const rating = parseFloat(park.google_rating);
+    const reviewCount = parseInt(park.google_review_count);
+    let ratingHtml = "";
+    if (!isNaN(rating)) {
+      ratingHtml = `
+        <span class="camp-card-meta-item">
+          <i data-lucide="star" class="icon" style="fill: var(--warning); color: var(--warning); width: 14px; height: 14px;"></i>
+          <span class="camp-card-rating">${rating.toFixed(1)}</span>
+          <span style="color: var(--text-muted);">(${reviewCount.toLocaleString()})</span>
+        </span>
+      `;
+    }
+    
+    // Accessibility Badges
+    let accBadgesHtml = "";
+    const accItems = [
+      { label: "ADA Campsites", key: "ada_sites" },
+      { label: "ADA Restrooms", key: "ada_restrooms" },
+      { label: "Paved Trails", key: "ada_trails" },
+      { label: "ADA Water Access", key: "ada_water_access" }
+    ];
+    accItems.forEach(item => {
+      if (park[item.key] === true || park[item.key] === "True") {
+        accBadgesHtml += `
+          <span class="camp-card-acc-badge">
+            <i data-lucide="check" style="width: 10px; height: 10px; color: hsl(210, 100%, 65%);"></i>
+            ${item.label}
+          </span>
+        `;
+      }
+    });
+    
+    // Site counts
+    const rvCount = parseInt(park.rv_sites_count);
+    const tentCount = parseInt(park.tent_sites_count);
+    const rvText = isNaN(rvCount)
+      ? (park.has_rv_camping === true || park.has_rv_camping === "True" ? "Yes" : "None")
+      : `${rvCount} RV`;
+    const tentText = isNaN(tentCount)
+      ? (park.has_tent_camping === true || park.has_tent_camping === "True" ? "Yes" : "None")
+      : `${tentCount} Tent`;
+
+    // Create the card element
+    const card = document.createElement("div");
+    card.className = "camp-card";
+    
+    card.innerHTML = `
+      <div class="camp-card-header">
+        <div>
+          <span class="camp-card-subtitle">${park.state} State Park</span>
+          <h4 class="camp-card-title">${park.park_name}</h4>
+        </div>
+        ${distanceStr}
+      </div>
+      
+      <div class="camp-card-meta">
+        ${ratingHtml}
+        <span class="camp-card-meta-item">
+          <i data-lucide="truck" class="icon"></i>
+          <span>${rvText}</span>
+        </span>
+        <span class="camp-card-meta-item">
+          <i data-lucide="tent" class="icon"></i>
+          <span>${tentText}</span>
+        </span>
+      </div>
+      
+      ${accBadgesHtml ? `<div class="camp-card-acc">${accBadgesHtml}</div>` : ''}
+      
+      <div class="camp-card-actions">
+        ${park.reservation_url ? `
+          <a href="${park.reservation_url}" target="_blank" class="btn btn-primary stop-propagation">
+            <i data-lucide="calendar-check" style="width: 14px; height: 14px;"></i> Book Campsite
+          </a>
+        ` : ''}
+        <button class="btn stop-propagation btn-view-on-map">
+          <i data-lucide="map" style="width: 14px; height: 14px;"></i> Map
+        </button>
+      </div>
+    `;
+    
+    // Add event listeners:
+    // 1. Click card to open Details Drawer
+    card.addEventListener("click", () => {
+      let foundMarker = null;
+      markersLayer.eachLayer(m => {
+        const latLng = m.getLatLng();
+        if (Math.abs(latLng.lat - parseFloat(park.latitude)) < 0.0001 &&
+            Math.abs(latLng.lng - parseFloat(park.longitude)) < 0.0001) {
+          foundMarker = m;
+        }
+      });
+      selectPark(park, foundMarker);
+    });
+    
+    // Stop propagation on action buttons to prevent opening details drawer twice
+    card.querySelectorAll(".stop-propagation").forEach(el => {
+      el.addEventListener("click", e => e.stopPropagation());
+    });
+    
+    // 2. View on map button click
+    card.querySelector(".btn-view-on-map").addEventListener("click", () => {
+      let foundMarker = null;
+      markersLayer.eachLayer(m => {
+        const latLng = m.getLatLng();
+        if (Math.abs(latLng.lat - parseFloat(park.latitude)) < 0.0001 &&
+            Math.abs(latLng.lng - parseFloat(park.longitude)) < 0.0001) {
+          foundMarker = m;
+        }
+      });
+      
+      // Toggle back to Map view
+      switchToView("map");
+      
+      // Select the park and open popup/drawer
+      if (foundMarker) {
+        selectPark(park, foundMarker);
+        foundMarker.openPopup();
+      }
+    });
+    
+    container.appendChild(card);
+  });
+  
   lucide.createIcons();
 }
