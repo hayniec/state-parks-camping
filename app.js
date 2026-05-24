@@ -1,5 +1,5 @@
 // Force cache flush when app version changes
-const CURRENT_VERSION = "stateparked-v10";
+const CURRENT_VERSION = "stateparked-v11";
 if (localStorage.getItem("app_version") !== CURRENT_VERSION) {
   localStorage.setItem("app_version", CURRENT_VERSION);
   if ("caches" in window) {
@@ -161,7 +161,7 @@ function initMap() {
    Data Fetching & Parsing
    ========================================================================== */
 function loadParkData() {
-  const unifiedCsv = "all_state_parks.csv?v=10";
+  const unifiedCsv = "all_state_parks.csv?v=11";
   Papa.parse(unifiedCsv, {
     download: true,
     header: true,
@@ -736,7 +736,12 @@ function selectPark(park, marker) {
   let targetUrl = park.reservation_url || park.park_url;
   let buttonLabel = "Reserve / Park Info";
 
-  if (park.state !== "AL") {
+  if (park.state === "AK") {
+    // Alaska State Parks campgrounds are mostly first-come, first-served and do not support direct campground booking URLs.
+    // Link directly to the main Alaska State Parks portal page.
+    targetUrl = "https://dnr.alaska.gov/parks/";
+    buttonLabel = "Go to Alaska State Parks Main Page";
+  } else if (park.state !== "AL") {
     // For states other than Alabama, direct search/reservation links often fail with 403/404 session timeouts.
     // Route users to the official state park details page where bookings can be safely initiated.
     targetUrl = park.park_url || park.reservation_url;
@@ -1041,6 +1046,18 @@ function renderListView(parks) {
       ? (park.has_tent_camping === true || park.has_tent_camping === "True" ? "Yes" : "None")
       : `${tentCount} Tent`;
 
+    // Determine target URL and button label based on state
+    let targetUrl = "";
+    let buttonLabel = "Reserve / Info";
+    if (park.state === "AK") {
+      targetUrl = "https://dnr.alaska.gov/parks/";
+      buttonLabel = "Go to Alaska State Parks Main Page";
+    } else if (park.state === "AL") {
+      targetUrl = park.reservation_url || park.park_url;
+    } else {
+      targetUrl = park.park_url || park.reservation_url;
+    }
+
     // Create the card element
     const card = document.createElement("div");
     card.className = "camp-card";
@@ -1069,9 +1086,9 @@ function renderListView(parks) {
       ${accBadgesHtml ? `<div class="camp-card-acc">${accBadgesHtml}</div>` : ''}
       
       <div class="camp-card-actions">
-        ${(park.reservation_url || park.park_url) ? `
-          <a href="${park.state === 'AL' ? (park.reservation_url || park.park_url) : (park.park_url || park.reservation_url)}" target="_blank" class="btn btn-primary stop-propagation">
-            <i data-lucide="calendar-check" style="width: 14px; height: 14px;"></i> Reserve / Info
+        ${targetUrl ? `
+          <a href="${targetUrl}" target="_blank" class="btn btn-primary stop-propagation">
+            <i data-lucide="calendar-check" style="width: 14px; height: 14px;"></i> ${buttonLabel}
           </a>
         ` : ''}
         <button class="btn stop-propagation btn-view-on-map">
