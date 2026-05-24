@@ -1,5 +1,5 @@
 // Force cache flush when app version changes
-const CURRENT_VERSION = "stateparked-v11";
+const CURRENT_VERSION = "stateparked-v12";
 if (localStorage.getItem("app_version") !== CURRENT_VERSION) {
   localStorage.setItem("app_version", CURRENT_VERSION);
   if ("caches" in window) {
@@ -736,12 +736,7 @@ function selectPark(park, marker) {
   let targetUrl = park.reservation_url || park.park_url;
   let buttonLabel = "Reserve / Park Info";
 
-  if (park.state === "AK") {
-    // Alaska State Parks campgrounds are mostly first-come, first-served and do not support direct campground booking URLs.
-    // Link directly to the main Alaska State Parks portal page.
-    targetUrl = "https://dnr.alaska.gov/parks/";
-    buttonLabel = "Go to Alaska State Parks Main Page";
-  } else if (park.state !== "AL") {
+  if (park.state !== "AL") {
     // For states other than Alabama, direct search/reservation links often fail with 403/404 session timeouts.
     // Route users to the official state park details page where bookings can be safely initiated.
     targetUrl = park.park_url || park.reservation_url;
@@ -1049,10 +1044,7 @@ function renderListView(parks) {
     // Determine target URL and button label based on state
     let targetUrl = "";
     let buttonLabel = "Reserve / Info";
-    if (park.state === "AK") {
-      targetUrl = "https://dnr.alaska.gov/parks/";
-      buttonLabel = "Go to Alaska State Parks Main Page";
-    } else if (park.state === "AL") {
+    if (park.state === "AL") {
       targetUrl = park.reservation_url || park.park_url;
     } else {
       targetUrl = park.park_url || park.reservation_url;
