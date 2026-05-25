@@ -1,10 +1,10 @@
-const CACHE_NAME = "stateparked-v15";
+const CACHE_NAME = "stateparked-v16";
 const ASSETS = [
   "./",
   "./index.html",
-  "./styles.css?v=15",
-  "./app.js?v=15",
-  "./all_state_parks.csv?v=15",
+  "./styles.css?v=16",
+  "./app.js?v=16",
+  "./all_state_parks.csv?v=16",
   "https://unpkg.com/leaflet@1.9.4/dist/leaflet.css",
   "https://unpkg.com/leaflet@1.9.4/dist/leaflet.js",
   "https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js",
