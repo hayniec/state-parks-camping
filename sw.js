@@ -1,4 +1,4 @@
-const CACHE_NAME = "stateparked-v18";
+const CACHE_NAME = "stateparked-v19";
 const ASSETS = [
   "./",
   "./index.html",

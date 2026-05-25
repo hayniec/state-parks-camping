@@ -1,5 +1,5 @@
 // Force cache flush when app version changes
-const CURRENT_VERSION = "stateparked-v18";
+const CURRENT_VERSION = "stateparked-v19";
 if (localStorage.getItem("app_version") !== CURRENT_VERSION) {
   localStorage.setItem("app_version", CURRENT_VERSION);
   if ("caches" in window) {
@@ -769,34 +769,6 @@ function selectPark(park, marker) {
     }
   } else {
     btnRoute.classList.add("hidden");
-  }
-
-
-  // Setup drawer tabs
-  const tabOverview = document.getElementById("tab-overview");
-  const tabDesc = document.getElementById("tab-description");
-  const contentOverview = document.getElementById("drawer-content-overview");
-  const contentDesc = document.getElementById("drawer-content-description");
-  
-  if (tabOverview && tabDesc) {
-    tabOverview.onclick = () => {
-      tabOverview.classList.add("active");
-      tabDesc.classList.remove("active");
-      contentOverview.classList.remove("hidden");
-      contentOverview.classList.add("active");
-      contentDesc.classList.add("hidden");
-      contentDesc.classList.remove("active");
-    };
-    tabDesc.onclick = () => {
-      tabDesc.classList.add("active");
-      tabOverview.classList.remove("active");
-      contentDesc.classList.remove("hidden");
-      contentDesc.classList.add("active");
-      contentOverview.classList.add("hidden");
-      contentOverview.classList.remove("active");
-    };
-    // Reset to overview on open
-    tabOverview.click();
   }
 
   // Open the drawer
