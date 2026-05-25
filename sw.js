@@ -1,7 +1,8 @@
-const CACHE_NAME = "stateparked-v19";
+const CACHE_NAME = "stateparked-v20";
 const ASSETS = [
   "./",
   "./index.html",
+  "./logo.png",
   "./styles.css?v=18",
   "./app.js?v=18",
   "./all_state_parks.csv?v=18",

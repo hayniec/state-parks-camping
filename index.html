@@ -5,17 +5,18 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <title>StateParked - State Park Campground Discovery</title>
+  <title>State Parked: The State Park Camp Finder</title>
   
   <!-- PWA Manifest -->
   <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/png" href="logo.png">
   <meta name="theme-color" content="#0d0e12">
   
   <!-- Leaflet Map CSS -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   
   <!-- Custom Fonts & Styles -->
-  <link rel="stylesheet" href="styles.css?v=19">
+  <link rel="stylesheet" href="styles.css?v=20">
 </head>
 <body>
 
@@ -23,8 +24,8 @@
   <header class="top-nav glass">
     <div class="brand-wrapper">
       <div class="brand-logo">
-        <i data-lucide="tent"></i>
-        <span>StateParked</span>
+        <img src="logo.png" alt="State Parked Logo" class="brand-img">
+        <span>State Parked</span>
       </div>
       <select id="state-select" class="state-select" aria-label="Select US State">
         <option value="ALL" selected>All States</option>
@@ -408,6 +409,6 @@
   <script src="https://unpkg.com/lucide@latest"></script>
   
   <!-- Application JS Controller -->
-  <script src="app.js?v=19"></script>
+  <script src="app.js?v=20"></script>
 </body>
 </html>
