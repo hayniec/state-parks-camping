@@ -617,7 +617,8 @@ h1, h2, h3, h4,
 }
 
 .detail-drawer-header {
-  height: 160px;
+  min-height: 160px;
+  height: auto;
   position: relative;
   background: var(--gradient-primary);
   display: flex;
@@ -655,9 +656,11 @@ h1, h2, h3, h4,
 }
 
 .header-park-name {
-  font-size: 22px;
+  font-size: 20px;
+  line-height: 1.3;
+  padding-right: 25px;
   color: var(--text-primary);
-  margin-bottom: 4px;
+  margin-bottom: 8px;
 }
 
 .header-subtitle {
@@ -1199,7 +1202,7 @@ h1, h2, h3, h4,
 
 @media (min-width: 768px) {
   .list-view-container {
-    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(450px, 1fr));
     /* Avoid overlapping with the filter panel sidebar if it's visible */
     margin-left: 395px;
     transition: margin-left 0.35s ease;

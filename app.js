@@ -1,5 +1,5 @@
 // Force cache flush when app version changes
-const CURRENT_VERSION = "stateparked-v21";
+const CURRENT_VERSION = "stateparked-v22";
 if (localStorage.getItem("app_version") !== CURRENT_VERSION) {
   localStorage.setItem("app_version", CURRENT_VERSION);
   if ("caches" in window) {
@@ -478,7 +478,12 @@ function cleanDescription(text, parkName) {
     }
   }
   
-  // 3. Remove leading line separators, underscores, or stray characters
+  // 3. Strip out markdown images and stray HTML that show up as raw code
+  clean = clean.replace(/!\[.*?\]\(.*?\)/g, ""); // remove markdown images
+  clean = clean.replace(/\[(.*?)\]\(.*?\)/g, "$1"); // convert markdown links to raw text
+  clean = clean.replace(/<[^>]*>/g, ""); // strip stray HTML tags
+  
+  // 4. Remove leading line separators, underscores, or stray characters
   clean = clean.replace(/^[_\s\-\u2014\n\r]+/, "");
   
   // 4. Format list items of admission fees and passes onto separate lines
