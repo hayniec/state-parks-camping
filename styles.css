@@ -1486,3 +1486,47 @@ body.high-contrast .btn-icon.active {
 }
 
 
+
+/* ==========================================================================
+   Drawer Tabs
+   ========================================================================== */
+.drawer-tabs {
+  display: flex;
+  background: rgba(0, 0, 0, 0.2);
+  border-top: 1px solid var(--border-light);
+  width: 100%;
+}
+
+.drawer-tab {
+  flex: 1;
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: var(--text-muted);
+  padding: 12px;
+  font-family: 'Outfit', sans-serif;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.drawer-tab:hover {
+  color: var(--text-primary);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.drawer-tab.active {
+  color: var(--color-primary-light);
+  border-bottom-color: var(--color-primary-light);
+}
+
+.drawer-tab-content {
+  display: none;
+  flex-direction: column;
+  gap: 28px;
+}
+
+.drawer-tab-content.active {
+  display: flex;
+}

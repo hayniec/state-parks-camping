@@ -15,7 +15,7 @@
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   
   <!-- Custom Fonts & Styles -->
-  <link rel="stylesheet" href="styles.css?v=16">
+  <link rel="stylesheet" href="styles.css?v=17">
 </head>
 <body>
 
@@ -189,6 +189,33 @@
             <span class="chip-bullet"></span>
             <span>Laundry</span>
           </label>
+          <label class="chip-label">
+            <input type="checkbox" id="amenity-waterfront">
+            <span class="chip-bullet"></span>
+            <span>Waterfront</span>
+          </label>
+        </div>
+      </div>
+
+      <!-- Site Type -->
+      <div class="filter-section">
+        <h3 class="filter-section-title">Site Type</h3>
+        <div class="chips-grid">
+          <label class="chip-label">
+            <input type="checkbox" id="site-concrete">
+            <span class="chip-bullet"></span>
+            <span>Concrete</span>
+          </label>
+          <label class="chip-label">
+            <input type="checkbox" id="site-dirt">
+            <span class="chip-bullet"></span>
+            <span>Dirt</span>
+          </label>
+          <label class="chip-label">
+            <input type="checkbox" id="site-gravel">
+            <span class="chip-bullet"></span>
+            <span>Gravel</span>
+          </label>
         </div>
       </div>
 
@@ -271,6 +298,12 @@
         </div>
         <h2 class="header-park-name" id="drawer-park-name">Park Name</h2>
       </div>
+      
+      <!-- Drawer Tabs -->
+      <div class="drawer-tabs">
+        <button class="drawer-tab active" id="tab-overview">Overview</button>
+        <button class="drawer-tab" id="tab-description">Description</button>
+      </div>
     </div>
     
     <div class="detail-drawer-body">
@@ -305,18 +338,9 @@
         </div>
       </div>
 
-      <!-- Description Section -->
-      <div class="filter-section">
-        <h3 class="filter-section-title">Campground Details</h3>
-        <div class="quick-info-list" id="drawer-quick-info">
-          <!-- Dynamically populated details (address, phone, hours) -->
-        </div>
-        <p class="desc-text" id="drawer-desc">
-          Description content goes here...
-        </p>
-      </div>
-
-      <!-- Amenities Section -->
+      <!-- Overview Tab Content -->
+      <div id="drawer-content-overview" class="drawer-tab-content active">
+        <!-- Amenities Section -->
       <div class="filter-section">
         <h3 class="filter-section-title">Amenities checklist</h3>
         <div class="badge-container" id="drawer-amenities-container">
@@ -358,6 +382,19 @@
           </a>
         </div>
       </div>
+      </div> <!-- End Overview Content -->
+
+      <!-- Description Tab Content -->
+      <div id="drawer-content-description" class="drawer-tab-content hidden">
+        <div class="filter-section">
+          <div class="quick-info-list" id="drawer-quick-info">
+            <!-- Dynamically populated details (address, phone) -->
+          </div>
+          <p class="desc-text" id="drawer-desc" style="white-space: pre-line;">
+            Description content goes here...
+          </p>
+        </div>
+      </div>
     </div>
     
     <!-- Action buttons footer -->
@@ -385,6 +422,6 @@
   <script src="https://unpkg.com/lucide@latest"></script>
   
   <!-- Application JS Controller -->
-  <script src="app.js?v=16"></script>
+  <script src="app.js?v=17"></script>
 </body>
 </html>

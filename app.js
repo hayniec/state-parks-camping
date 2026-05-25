@@ -1,5 +1,5 @@
 // Force cache flush when app version changes
-const CURRENT_VERSION = "stateparked-v16";
+const CURRENT_VERSION = "stateparked-v17";
 if (localStorage.getItem("app_version") !== CURRENT_VERSION) {
   localStorage.setItem("app_version", CURRENT_VERSION);
   if ("caches" in window) {
@@ -235,6 +235,11 @@ function applyFilters() {
   const minTentSites = parseInt(document.getElementById("min-tent-sites").value) || 0;
   const minRating = parseFloat(document.getElementById("min-rating").value) || 0.0;
 
+  // Site Types
+  const filterConcrete = document.getElementById("site-concrete") ? document.getElementById("site-concrete").checked : false;
+  const filterDirt = document.getElementById("site-dirt") ? document.getElementById("site-dirt").checked : false;
+  const filterGravel = document.getElementById("site-gravel") ? document.getElementById("site-gravel").checked : false;
+
   // 2. Boolean Amenities Toggles
   const amenities = {
     full_hookups: document.getElementById("amenity-full").checked,
@@ -247,6 +252,7 @@ function applyFilters() {
     showers: document.getElementById("amenity-showers").checked,
     wifi: document.getElementById("amenity-wifi").checked,
     laundry: document.getElementById("amenity-laundry").checked,
+    waterfront_sites: document.getElementById("amenity-waterfront") ? document.getElementById("amenity-waterfront").checked : false,
   };
 
   // 3. Activity Toggles
@@ -274,6 +280,11 @@ function applyFilters() {
     // Camping Toggles
     if (filterRv && park.has_rv_camping !== true && park.has_rv_camping !== "True") return false;
     if (filterTent && park.has_tent_camping !== true && park.has_tent_camping !== "True") return false;
+
+    // Site Type Toggles
+    if (filterConcrete && park.site_type_concrete !== true && park.site_type_concrete !== "True" && park.site_type !== "Concrete") return false;
+    if (filterDirt && park.site_type_dirt !== true && park.site_type_dirt !== "True" && park.site_type !== "Dirt") return false;
+    if (filterGravel && park.site_type_gravel !== true && park.site_type_gravel !== "True" && park.site_type !== "Gravel") return false;
 
     // Minimum Counts
     const rvCount = parseInt(park.rv_sites_count) || 0;
@@ -582,18 +593,7 @@ function selectPark(park, marker) {
     hasQuickInfo = true;
   }
 
-  const hours = extractHours(rawDesc);
-  if (hours) {
-    // Format hours subheaders (e.g. Winter Hours, Summer Hours) onto separate lines with bullets
-    const formattedHours = hours.replace(/(winter|summer|store|office|gate|campground)\s+hours/gi, "<br>• $&");
-    quickInfoContainer.innerHTML += `
-      <div class="quick-info-item">
-        <i data-lucide="clock" class="icon"></i>
-        <span><span class="label">Hours:</span> ${formattedHours}</span>
-      </div>
-    `;
-    hasQuickInfo = true;
-  }
+
 
   if (hasQuickInfo) {
     quickInfoContainer.classList.remove("hidden");
@@ -769,6 +769,34 @@ function selectPark(park, marker) {
     }
   } else {
     btnRoute.classList.add("hidden");
+  }
+
+
+  // Setup drawer tabs
+  const tabOverview = document.getElementById("tab-overview");
+  const tabDesc = document.getElementById("tab-description");
+  const contentOverview = document.getElementById("drawer-content-overview");
+  const contentDesc = document.getElementById("drawer-content-description");
+  
+  if (tabOverview && tabDesc) {
+    tabOverview.onclick = () => {
+      tabOverview.classList.add("active");
+      tabDesc.classList.remove("active");
+      contentOverview.classList.remove("hidden");
+      contentOverview.classList.add("active");
+      contentDesc.classList.add("hidden");
+      contentDesc.classList.remove("active");
+    };
+    tabDesc.onclick = () => {
+      tabDesc.classList.add("active");
+      tabOverview.classList.remove("active");
+      contentDesc.classList.remove("hidden");
+      contentDesc.classList.add("active");
+      contentOverview.classList.add("hidden");
+      contentOverview.classList.remove("active");
+    };
+    // Reset to overview on open
+    tabOverview.click();
   }
 
   // Open the drawer
