@@ -12,7 +12,7 @@ Most official systems are managed by state Departments of Natural Resources (DNR
 | **Arkansas** | Arkansas State Parks | [arkansasstateparks.com](https://www.arkansasstateparks.com) |
 | **California** | California State Parks | [parks.ca.gov](https://www.parks.ca.gov) |
 | **Colorado** | Colorado Parks & Wildlife | [cpw.state.co.us](https://cpw.state.co.us) |
-| **Connecticut** | Connecticut State Parks (DEEP) | [portal.ct.gov/DEEP/State-Parks](https://portal.ct.gov/DEEP/State-Parks/Connecticut-State-Parks) |
+| **Connecticut** | Connecticut State Parks (DEEP) | [portal.ct.gov/deep/state-parks/listing-of-state-parks](https://portal.ct.gov/deep/state-parks/listing-of-state-parks) |
 | **Delaware** | Delaware State Parks | [destateparks.com](https://destateparks.com) |
 | **Florida** | Florida State Parks | [floridastateparks.org](https://www.floridastateparks.org) |
 | **Georgia** | Georgia State Parks & Historic Sites | [gastateparks.org](https://gastateparks.org) |
