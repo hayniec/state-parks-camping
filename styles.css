@@ -661,6 +661,8 @@ h1, h2, h3, h4,
   padding-right: 25px;
   color: var(--text-primary);
   margin-bottom: 8px;
+  word-wrap: break-word;
+  white-space: normal;
 }
 
 .header-subtitle {
@@ -1202,10 +1204,16 @@ h1, h2, h3, h4,
 
 @media (min-width: 768px) {
   .list-view-container {
-    grid-template-columns: repeat(auto-fill, minmax(450px, 1fr));
+    grid-template-columns: 1fr;
     /* Avoid overlapping with the filter panel sidebar if it's visible */
     margin-left: 395px;
     transition: margin-left 0.35s ease;
+  }
+}
+
+@media (min-width: 1200px) {
+  .list-view-container {
+    grid-template-columns: 1fr 1fr;
   }
   
   /* If the filters are hidden, let the list view take the full width! */

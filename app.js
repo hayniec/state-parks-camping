@@ -1,5 +1,5 @@
 // Force cache flush when app version changes
-const CURRENT_VERSION = "stateparked-v22";
+const CURRENT_VERSION = "stateparked-v23";
 if (localStorage.getItem("app_version") !== CURRENT_VERSION) {
   localStorage.setItem("app_version", CURRENT_VERSION);
   if ("caches" in window) {
