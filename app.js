@@ -1,5 +1,5 @@
 // Force cache flush when app version changes
-const CURRENT_VERSION = "stateparked-v24";
+const CURRENT_VERSION = "stateparked-v25";
 if (localStorage.getItem("app_version") !== CURRENT_VERSION) {
   localStorage.setItem("app_version", CURRENT_VERSION);
   if ("caches" in window) {
@@ -167,7 +167,7 @@ function initMap() {
    Data Fetching & Parsing
    ========================================================================== */
 function loadParkData() {
-  const unifiedCsv = "all_state_parks.csv?v=24";
+  const unifiedCsv = "all_state_parks.csv?v=25";
   Papa.parse(unifiedCsv, {
     download: true,
     header: true,
@@ -201,10 +201,15 @@ function renderMarkers(parks) {
 
     if (isNaN(lat) || isNaN(lon)) return; // Skip parks without geocoding data
 
+    // Determine if the park has camping
+    const hasCamping = (park.has_rv_camping === true || park.has_rv_camping === "True") || 
+                       (park.has_tent_camping === true || park.has_tent_camping === "True");
+
     // Create custom styled marker
+    const pinClass = hasCamping ? "marker-pin" : "marker-pin no-camping";
     const customIcon = L.divIcon({
       className: "custom-div-icon",
-      html: `<div class="marker-pin" id="pin-${park.park_slug}"></div>`,
+      html: `<div class="${pinClass}" id="pin-${park.park_slug}"></div>`,
       iconSize: [30, 42],
       iconAnchor: [15, 42],
     });
@@ -219,6 +224,15 @@ function renderMarkers(parks) {
       closeButton: false,
       offset: L.point(0, -32)
     });
+
+    // Hover tooltip for non-camping pins
+    if (!hasCamping) {
+      marker.bindTooltip("No Camping Available", {
+        direction: "top",
+        offset: L.point(0, -32),
+        className: "no-camping-tooltip"
+      });
+    }
 
     // Handle marker click
     marker.on("click", () => {
@@ -508,6 +522,8 @@ function cleanDescription(text, parkName) {
    ========================================================================== */
 function selectPark(park, marker) {
   selectedPark = park;
+  const hasCamping = (park.has_rv_camping === true || park.has_rv_camping === "True") || 
+                     (park.has_tent_camping === true || park.has_tent_camping === "True");
 
   // Un-highlight previous marker pin
   if (activeMarker) {
@@ -745,7 +761,7 @@ function selectPark(park, marker) {
   const btnReserve = document.getElementById("btn-reserve");
   
   let targetUrl = park.reservation_url || park.park_url;
-  let buttonLabel = "Reserve / Park Info";
+  let buttonLabel = hasCamping ? "Reserve / Park Info" : "Official Website";
 
   if (park.state !== "AL") {
     // For states other than Alabama, direct search/reservation links often fail with 403/404 session timeouts.
@@ -1052,9 +1068,11 @@ function renderListView(parks) {
       ? (park.has_tent_camping === true || park.has_tent_camping === "True" ? "Yes" : "None")
       : `${tentCount} Tent`;
 
-    // Determine target URL and button label based on state
+    // Determine target URL and button label based on state and camping
+    const hasCamping = (park.has_rv_camping === true || park.has_rv_camping === "True") || 
+                       (park.has_tent_camping === true || park.has_tent_camping === "True");
     let targetUrl = "";
-    let buttonLabel = "Reserve / Info";
+    let buttonLabel = hasCamping ? "Reserve / Info" : "Official Website";
     if (park.state === "AL") {
       targetUrl = park.reservation_url || park.park_url;
     } else {
