@@ -184,7 +184,10 @@ def main() -> int:
         "AR": "Arkansas",
         "CA": "California",
         "CO": "Colorado",
-        "CT": "Connecticut"
+        "CT": "Connecticut",
+        "DE": "Delaware",
+        "FL": "Florida",
+        "GA": "Georgia"
     }
 
     # Geocode each park
