@@ -19,19 +19,7 @@ HEADERS = [
 ]
 
 NON_CAMPING_PARKS = {
-    "AL": [
-        {
-            "park_name": "Confederate Memorial Park",
-            "park_url": "https://www.alapark.com/parks/confederate-memorial-park",
-            "address": "1430 County Road 20, Marbury, AL 36051",
-            "latitude": 32.7056,
-            "longitude": -86.4673,
-            "phone_general": "205-755-1990",
-            "pet_friendly": True,
-            "hiking": True,
-            "description_text": "Confederate Memorial Park is the site of Alabama's only Confederate Soldiers' Home, now operating as a historic day-use park with a museum and nature trails.",
-        }
-    ],
+    "AL": [],
     "AK": [
         {
             "park_name": "Potter Section House State Historic Site",
