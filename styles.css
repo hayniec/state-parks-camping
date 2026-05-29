@@ -107,12 +107,10 @@ body {
   line-height: 1.5;
 }
 
-h1, h2, h3, h4, 
-.brand-img {
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  box-shadow: 0 0 8px rgba(0,0,0,0.5);
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Outfit', sans-serif;
+  margin: 0;
+  font-weight: 600;
 }
 
 .brand-logo {
