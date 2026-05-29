@@ -16,7 +16,7 @@
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   
   <!-- Custom Fonts & Styles -->
-  <link rel="stylesheet" href="styles.css?v=26">
+  <link rel="stylesheet" href="styles.css?v=27">
 </head>
 <body>
 
@@ -315,7 +315,7 @@
       </div>
 
       <!-- Capacity & Specs -->
-      <div class="detail-grid">
+      <div class="detail-grid" id="drawer-camping-specs">
         <div class="detail-card">
           <span class="detail-card-label">RV Campsites</span>
           <span class="detail-card-value highlight" id="drawer-rv-count">Yes</span>
@@ -377,7 +377,7 @@
       </div>
       <!-- Description Section -->
       <div class="filter-section">
-        <h3 class="filter-section-title">Campground Details</h3>
+        <h3 class="filter-section-title" id="drawer-details-title">Campground Details</h3>
         <div class="quick-info-list" id="drawer-quick-info"></div>
         <p class="desc-text" id="drawer-desc" style="white-space: pre-line;">
           Description content goes here...

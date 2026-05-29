@@ -1,5 +1,5 @@
 // Force cache flush when app version changes
-const CURRENT_VERSION = "stateparked-v26";
+const CURRENT_VERSION = "stateparked-v27";
 if (localStorage.getItem("app_version") !== CURRENT_VERSION) {
   localStorage.setItem("app_version", CURRENT_VERSION);
   if ("caches" in window) {
@@ -167,7 +167,7 @@ function initMap() {
    Data Fetching & Parsing
    ========================================================================== */
 function loadParkData() {
-  const unifiedCsv = "all_state_parks.csv?v=26";
+  const unifiedCsv = "all_state_parks.csv?v=27";
   Papa.parse(unifiedCsv, {
     download: true,
     header: true,
@@ -525,6 +525,17 @@ function selectPark(park, marker) {
   const hasCamping = (park.has_rv_camping === true || park.has_rv_camping === "True") || 
                      (park.has_tent_camping === true || park.has_tent_camping === "True");
 
+  // Show/hide camping details based on availability
+  const campingSpecs = document.getElementById("drawer-camping-specs");
+  const detailsTitle = document.getElementById("drawer-details-title");
+  if (hasCamping) {
+    campingSpecs.classList.remove("hidden");
+    detailsTitle.textContent = "Campground Details";
+  } else {
+    campingSpecs.classList.add("hidden");
+    detailsTitle.textContent = "Park Details";
+  }
+
   // Un-highlight previous marker pin
   if (activeMarker) {
     const prevPin = document.querySelector(".marker-pin.active");
@@ -729,7 +740,7 @@ function selectPark(park, marker) {
   // Contacts
   const address = park.address;
   const addressElement = document.getElementById("drawer-address");
-  addressElement.innerHTML = `<i data-lucide="map-pin" class="icon"></i> ${address || "No address listed"}`;
+  addressElement.innerHTML = `<i data-lucide="map-pin" class="icon"></i> <span>${address || "No address listed"}</span>`;
   if (address && park.google_maps_url) {
     addressElement.href = park.google_maps_url;
   } else {
@@ -744,7 +755,7 @@ function selectPark(park, marker) {
   if (phoneCamping) {
     phoneCampElement.classList.remove("hidden");
     phoneCampElement.href = `tel:${phoneCamping.replace(/\D/g, "")}`;
-    phoneCampElement.innerHTML = `<i data-lucide="phone-call" class="icon"></i> Call Camping: ${phoneCamping}`;
+    phoneCampElement.innerHTML = `<i data-lucide="phone-call" class="icon"></i> <span>Call Camping: ${phoneCamping}</span>`;
   } else {
     phoneCampElement.classList.add("hidden");
   }
@@ -752,7 +763,7 @@ function selectPark(park, marker) {
   if (phoneGeneral) {
     phoneGenElement.classList.remove("hidden");
     phoneGenElement.href = `tel:${phoneGeneral.replace(/\D/g, "")}`;
-    phoneGenElement.innerHTML = `<i data-lucide="phone" class="icon"></i> Call Office: ${phoneGeneral}`;
+    phoneGenElement.innerHTML = `<i data-lucide="phone" class="icon"></i> <span>Call Office: ${phoneGeneral}</span>`;
   } else {
     phoneGenElement.classList.add("hidden");
   }

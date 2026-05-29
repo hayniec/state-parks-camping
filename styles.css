@@ -622,7 +622,8 @@ h1, h2, h3, h4,
   position: relative;
   background: var(--gradient-primary);
   display: flex;
-  align-items: flex-end;
+  flex-direction: column;
+  justify-content: flex-end;
   padding: 20px;
   overflow: hidden;
 }
@@ -839,7 +840,7 @@ h1, h2, h3, h4,
 
 .contact-row {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 12px;
   font-size: 13px;
   color: var(--text-secondary);
@@ -854,6 +855,8 @@ h1, h2, h3, h4,
   width: 16px;
   height: 16px;
   color: var(--color-primary);
+  flex-shrink: 0;
+  margin-top: 2px;
 }
 
 /* Description Text styling */
