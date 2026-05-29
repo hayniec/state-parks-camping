@@ -1,5 +1,5 @@
 // Force cache flush when app version changes
-const CURRENT_VERSION = "stateparked-v25";
+const CURRENT_VERSION = "stateparked-v26";
 if (localStorage.getItem("app_version") !== CURRENT_VERSION) {
   localStorage.setItem("app_version", CURRENT_VERSION);
   if ("caches" in window) {
@@ -167,7 +167,7 @@ function initMap() {
    Data Fetching & Parsing
    ========================================================================== */
 function loadParkData() {
-  const unifiedCsv = "all_state_parks.csv?v=25";
+  const unifiedCsv = "all_state_parks.csv?v=26";
   Papa.parse(unifiedCsv, {
     download: true,
     header: true,
