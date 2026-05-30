@@ -1,5 +1,5 @@
 // Force cache flush when app version changes
-const CURRENT_VERSION = "stateparked-v28";
+const CURRENT_VERSION = "stateparked-v29";
 if (localStorage.getItem("app_version") !== CURRENT_VERSION) {
   localStorage.setItem("app_version", CURRENT_VERSION);
   if ("caches" in window) {
@@ -124,6 +124,18 @@ const STATE_CONFIG = {
     center: [39.0, -75.5],
     zoom: 8.5,
     csv: "delaware_state_parks.csv"
+  },
+  FL: {
+    name: "Florida",
+    center: [27.6648, -81.5158],
+    zoom: 6.5,
+    csv: "florida_state_parks.csv"
+  },
+  GA: {
+    name: "Georgia",
+    center: [32.1656, -82.9001],
+    zoom: 7.0,
+    csv: "georgia_state_parks.csv"
   }
 };
 let activeState = "ALL";
@@ -167,7 +179,7 @@ function initMap() {
    Data Fetching & Parsing
    ========================================================================== */
 function loadParkData() {
-  const unifiedCsv = "all_state_parks.csv?v=28";
+  const unifiedCsv = "all_state_parks.csv?v=29";
   Papa.parse(unifiedCsv, {
     download: true,
     header: true,
