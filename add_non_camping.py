@@ -23,7 +23,7 @@ NON_CAMPING_PARKS = {
     "AK": [
         {
             "park_name": "Potter Section House State Historic Site",
-            "park_url": "http://dnr.alaska.gov/parks/aspunits/anch/pottersh.htm",
+            "park_url": "https://dnr.alaska.gov/parks/aspunits/chugach/potrangerst.htm",
             "address": "MHT 9400234 Seward Hwy, Anchorage, AK 99516",
             "latitude": 61.0416,
             "longitude": -149.7947,
@@ -34,7 +34,7 @@ NON_CAMPING_PARKS = {
         },
         {
             "park_name": "Refuge Cove State Recreation Site",
-            "park_url": "http://dnr.alaska.gov/parks/aspunits/southeast/refugecovesrs.htm",
+            "park_url": "https://dnr.alaska.gov/parks/aspunits/southeast/refugecvsrs.htm",
             "address": "Refuge Cove Rd, Ketchikan, AK 99901",
             "latitude": 55.4019,
             "longitude": -131.7514,
@@ -288,6 +288,112 @@ NON_CAMPING_PARKS = {
             "hiking": True,
             "description_text": "Sleeping Giant State Park features a mountaintop stone observation tower at the end of a scenic trail resembling a giant lying down, popular for hiking and views.",
         }
+    ],
+    "HI": [
+        {
+            "park_name": "Diamond Head State Monument",
+            "park_url": "https://dlnr.hawaii.gov/dsp/parks/oahu/diamond-head-state-monument/",
+            "address": "Diamond Head Road, Honolulu, HI 96815",
+            "latitude": 21.2625,
+            "longitude": -157.8062,
+            "phone_general": "808-587-0300",
+            "pet_friendly": False,
+            "hiking": True,
+            "description_text": "Diamond Head State Monument features the iconic volcanic tuff cone of Diamond Head (Leahi), offering a steep historic hiking trail to the summit with panoramic views of Waikiki and the Pacific Ocean.",
+        }
+    ],
+    "ID": [
+        {
+            "park_name": "Lucky Peak State Park",
+            "park_url": "https://parksandrecreation.idaho.gov/parks/lucky-peak/",
+            "address": "9725 E Highway 21, Boise, ID 83716",
+            "latitude": 43.5228,
+            "longitude": -116.0592,
+            "phone_general": "208-334-2432",
+            "pet_friendly": True,
+            "hiking": True,
+            "swimming": True,
+            "boat_ramp": True,
+            "description_text": "Lucky Peak State Park, located close to Boise, consists of three units (Discovery, Sandy Point, Spring Shores) offering swimming, boating, and picnicking along the Boise River and Lucky Peak Reservoir.",
+        }
+    ],
+    "IL": [
+        {
+            "park_name": "Matthiessen State Park",
+            "park_url": "https://dnr.illinois.gov/parks/park.matthiessen.html",
+            "address": "2500 IL-178, Utica, IL 61373",
+            "latitude": 41.2959,
+            "longitude": -89.027,
+            "phone_general": "815-667-4868",
+            "pet_friendly": True,
+            "hiking": True,
+            "description_text": "Matthiessen State Park features beautiful sandstone canyons, mineral springs, and unusual rock formations along a scenic mile-long canyon, located just south of Starved Rock.",
+        }
+    ],
+    "IN": [
+        {
+            "park_name": "Fort Harrison State Park",
+            "park_url": "https://www.in.gov/dnr/state-parks/parks-lakes/fort-harrison-state-park/",
+            "address": "6000 N Post Rd, Indianapolis, IN 46216",
+            "latitude": 39.8667,
+            "longitude": -86.0167,
+            "phone_general": "317-591-0904",
+            "pet_friendly": True,
+            "hiking": True,
+            "description_text": "Fort Harrison State Park features scenic walking trails along Fall Creek, a championship golf course, a historic military base museum, and popular sledding hills.",
+        }
+    ],
+    "IA": [
+        {
+            "park_name": "Mines of Spain State Recreation Area",
+            "park_url": "https://www.iowadnr.gov/places-go/state-parks/all-parks/mines-spain-state-recreation-area",
+            "address": "8991 Bellevue Heights Rd, Dubuque, IA 52003",
+            "latitude": 42.4633,
+            "longitude": -90.6472,
+            "phone_general": "563-556-0620",
+            "pet_friendly": True,
+            "hiking": True,
+            "description_text": "Mines of Spain State Recreation Area features rugged limestone bluffs overlooking the Mississippi River, historic lead mining sites, and the Julien Dubuque Monument.",
+        }
+    ],
+    "KS": [
+        {
+            "park_name": "Little Jerusalem Badlands State Park",
+            "park_url": "https://ksoutdoors.com/State-Parks/Locations/Little-Jerusalem-Badlands",
+            "address": "County Rd 400, Oakley, KS 67748",
+            "latitude": 38.8048,
+            "longitude": -100.9328,
+            "phone_general": "785-877-2953",
+            "pet_friendly": False,
+            "hiking": True,
+            "description_text": "Little Jerusalem Badlands State Park features 220 acres of dramatic, 100-foot-tall chalk rock formations, providing habitat for unique plants and wildlife, with trails offering scenic overlooks.",
+        }
+    ],
+    "KY": [
+        {
+            "park_name": "Perryville Battlefield State Historic Site",
+            "park_url": "https://parks.ky.gov/perryville/parks/historic/perryville-battlefield-state-historic-site",
+            "address": "1825 Battlefield Rd, Perryville, KY 40468",
+            "latitude": 37.6728,
+            "longitude": -84.9756,
+            "phone_general": "859-332-8631",
+            "pet_friendly": True,
+            "hiking": True,
+            "description_text": "Perryville Battlefield State Historic Site preserves the site of the most destructive Civil War battle in Kentucky, featuring a museum, walking trails, and historical markers.",
+        }
+    ],
+    "LA": [
+        {
+            "park_name": "Longfellow-Evangeline State Historic Site",
+            "park_url": "https://www.lastateparks.com/historic-sites/longfellow-evangeline-state-historic-site",
+            "address": "1200 N Main St, St. Martinville, LA 70582",
+            "latitude": 30.1367,
+            "longitude": -91.8267,
+            "phone_general": "337-394-3754",
+            "pet_friendly": False,
+            "hiking": True,
+            "description_text": "Longfellow-Evangeline State Historic Site explores the cultural history of the Bayou Teche region, featuring a historic plantation home, reproduction Acadian cabin, and museum exhibits.",
+        }
     ]
 }
 
@@ -302,7 +408,15 @@ def main():
         "AR": "arkansas_state_parks.csv",
         "CA": "california_state_parks.csv",
         "CO": "colorado_state_parks.csv",
-        "CT": "connecticut_state_parks.csv"
+        "CT": "connecticut_state_parks.csv",
+        "HI": "hawaii_state_parks.csv",
+        "ID": "idaho_state_parks.csv",
+        "IL": "illinois_state_parks.csv",
+        "IN": "indiana_state_parks.csv",
+        "IA": "iowa_state_parks.csv",
+        "KS": "kansas_state_parks.csv",
+        "KY": "kentucky_state_parks.csv",
+        "LA": "louisiana_state_parks.csv"
     }
 
     for state_code, file_name in state_files.items():

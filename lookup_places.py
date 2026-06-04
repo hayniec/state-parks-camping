@@ -157,7 +157,15 @@ def main() -> int:
         "CT": "Connecticut",
         "DE": "Delaware",
         "FL": "Florida",
-        "GA": "Georgia"
+        "GA": "Georgia",
+        "HI": "Hawaii",
+        "ID": "Idaho",
+        "IL": "Illinois",
+        "IN": "Indiana",
+        "IA": "Iowa",
+        "KS": "Kansas",
+        "KY": "Kentucky",
+        "LA": "Louisiana"
     }
 
     for row in records:

@@ -39,6 +39,14 @@
         <option value="DE">Delaware</option>
         <option value="FL">Florida</option>
         <option value="GA">Georgia</option>
+        <option value="HI">Hawaii</option>
+        <option value="ID">Idaho</option>
+        <option value="IL">Illinois</option>
+        <option value="IN">Indiana</option>
+        <option value="IA">Iowa</option>
+        <option value="KS">Kansas</option>
+        <option value="KY">Kentucky</option>
+        <option value="LA">Louisiana</option>
       </select>
     </div>
     
@@ -184,11 +192,6 @@
             <span>Showers</span>
           </label>
           <label class="chip-label">
-            <input type="checkbox" id="amenity-wifi">
-            <span class="chip-bullet"></span>
-            <span>WiFi</span>
-          </label>
-          <label class="chip-label">
             <input type="checkbox" id="amenity-laundry">
             <span class="chip-bullet"></span>
             <span>Laundry</span>
@@ -197,6 +200,33 @@
             <input type="checkbox" id="amenity-waterfront">
             <span class="chip-bullet"></span>
             <span>Waterfront</span>
+          </label>
+        </div>
+      </div>
+
+      <!-- 6. Connectivity -->
+      <div class="filter-section">
+        <h3 class="filter-section-title">Cell Coverage &amp; Wi-Fi</h3>
+        <div class="chips-grid">
+          <label class="chip-label">
+            <input type="checkbox" id="connectivity-verizon">
+            <span class="chip-bullet"></span>
+            <span>Verizon</span>
+          </label>
+          <label class="chip-label">
+            <input type="checkbox" id="connectivity-att">
+            <span class="chip-bullet"></span>
+            <span>AT&amp;T</span>
+          </label>
+          <label class="chip-label">
+            <input type="checkbox" id="connectivity-tmobile">
+            <span class="chip-bullet"></span>
+            <span>T-Mobile</span>
+          </label>
+          <label class="chip-label">
+            <input type="checkbox" id="connectivity-wifi">
+            <span class="chip-bullet"></span>
+            <span>Wi-Fi</span>
           </label>
         </div>
       </div>
@@ -335,11 +365,112 @@
           <span class="detail-card-value" id="drawer-rig-length">35 ft</span>
         </div>
       </div>
-        <!-- Amenities Section -->
+
+      <!-- Real-Time Campsite Availability & Alerts -->
+      <div class="filter-section hidden" id="drawer-availability-section">
+        <h3 class="filter-section-title">Live Campsite Availability</h3>
+        <div class="availability-card glass">
+          <div class="availability-row">
+            <div class="availability-info">
+              <span class="avail-label">RV Sites Available:</span>
+              <span class="avail-value" id="drawer-avail-rv">Loading...</span>
+            </div>
+            <div class="progress-bar-container">
+              <div class="progress-bar-fill" id="drawer-avail-rv-bar" style="width: 0%;"></div>
+            </div>
+          </div>
+          <div class="availability-row">
+            <div class="availability-info">
+              <span class="avail-label">Tent/Primitive Available:</span>
+              <span class="avail-value" id="drawer-avail-tent">Loading...</span>
+            </div>
+            <div class="progress-bar-container">
+              <div class="progress-bar-fill" id="drawer-avail-tent-bar" style="width: 0%;"></div>
+            </div>
+          </div>
+          
+          <button id="btn-subscribe-alerts" class="btn btn-primary btn-subscribe-alerts">
+            <i data-lucide="bell"></i>
+            <span id="subscribe-btn-text">Get Availability Alerts</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Weather Alerts Card -->
+      <div class="filter-section hidden" id="drawer-weather-section">
+        <h3 class="filter-section-title">Active Weather Alerts</h3>
+        <div id="drawer-weather-alerts-container">
+          <!-- Live alerts from NWS -->
+        </div>
+        <div class="weather-opt-out-row">
+          <label class="toggle-switch-container">
+            <input type="checkbox" id="opt-out-weather" checked>
+            <span class="toggle-switch-slider"></span>
+            <span class="toggle-switch-label">Show weather warnings for this park</span>
+          </label>
+        </div>
+      </div>
+
+      <!-- Amenities Section -->
       <div class="filter-section">
         <h3 class="filter-section-title">Amenities checklist</h3>
         <div class="badge-container" id="drawer-amenities-container">
           <!-- Badges list -->
+        </div>
+      </div>
+
+      <!-- Connectivity Details Section -->
+      <div class="filter-section">
+        <h3 class="filter-section-title">Connectivity &amp; Signal</h3>
+        <div class="connectivity-drawer-grid">
+          <div class="connectivity-drawer-card">
+            <span class="carrier-name">Verizon</span>
+            <div class="signal-bars-container">
+              <div class="signal-bars" id="signal-verizon">
+                <div class="bar"></div>
+                <div class="bar"></div>
+                <div class="bar"></div>
+                <div class="bar"></div>
+                <div class="bar"></div>
+              </div>
+              <span class="signal-text" id="signal-text-verizon">Checking...</span>
+            </div>
+          </div>
+          <div class="connectivity-drawer-card">
+            <span class="carrier-name">AT&amp;T</span>
+            <div class="signal-bars-container">
+              <div class="signal-bars" id="signal-att">
+                <div class="bar"></div>
+                <div class="bar"></div>
+                <div class="bar"></div>
+                <div class="bar"></div>
+                <div class="bar"></div>
+              </div>
+              <span class="signal-text" id="signal-text-att">Checking...</span>
+            </div>
+          </div>
+          <div class="connectivity-drawer-card">
+            <span class="carrier-name">T-Mobile</span>
+            <div class="signal-bars-container">
+              <div class="signal-bars" id="signal-tmobile">
+                <div class="bar"></div>
+                <div class="bar"></div>
+                <div class="bar"></div>
+                <div class="bar"></div>
+                <div class="bar"></div>
+              </div>
+              <span class="signal-text" id="signal-text-tmobile">Checking...</span>
+            </div>
+          </div>
+          <div class="connectivity-drawer-card">
+            <span class="carrier-name">Wi-Fi</span>
+            <div class="wifi-status-container">
+              <span class="wifi-status-icon-wrapper" id="wifi-status-icon">
+                <i data-lucide="wifi-off"></i>
+              </span>
+              <span class="signal-text" id="wifi-status-text">Checking...</span>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -401,6 +532,9 @@
       </a>
     </div>
   </article>
+
+  <!-- Notification Toast Container -->
+  <div id="toast-container" class="toast-container"></div>
 
   <!-- External Library CDNs -->
   <!-- PapaParse for Client-Side CSV Reading -->

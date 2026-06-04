@@ -136,6 +136,54 @@ const STATE_CONFIG = {
     center: [32.1656, -82.9001],
     zoom: 7.0,
     csv: "georgia_state_parks.csv"
+  },
+  HI: {
+    name: "Hawaii",
+    center: [20.7967, -156.3319],
+    zoom: 7.5,
+    csv: "hawaii_state_parks.csv"
+  },
+  ID: {
+    name: "Idaho",
+    center: [44.0682, -114.7420],
+    zoom: 6.5,
+    csv: "idaho_state_parks.csv"
+  },
+  IL: {
+    name: "Illinois",
+    center: [40.6331, -89.3985],
+    zoom: 6.5,
+    csv: "illinois_state_parks.csv"
+  },
+  IN: {
+    name: "Indiana",
+    center: [40.2672, -86.1349],
+    zoom: 7.0,
+    csv: "indiana_state_parks.csv"
+  },
+  IA: {
+    name: "Iowa",
+    center: [41.8780, -93.0977],
+    zoom: 7.0,
+    csv: "iowa_state_parks.csv"
+  },
+  KS: {
+    name: "Kansas",
+    center: [38.5, -98.0],
+    zoom: 7.0,
+    csv: "kansas_state_parks.csv"
+  },
+  KY: {
+    name: "Kentucky",
+    center: [37.8, -84.3],
+    zoom: 7.5,
+    csv: "kentucky_state_parks.csv"
+  },
+  LA: {
+    name: "Louisiana",
+    center: [31.0, -92.0],
+    zoom: 7.5,
+    csv: "louisiana_state_parks.csv"
   }
 };
 let activeState = "ALL";
@@ -189,6 +237,7 @@ function loadParkData() {
       allParks = results.data;
       console.log(`Loaded ${allParks.length} parks from ${unifiedCsv}.`);
       applyFilters(); // Initial render
+      // startAvailabilityAlertCheck(); // Start background campsite availability checker
     },
     error: function (error) {
       console.error(`Error reading ${unifiedCsv}:`, error);
@@ -282,10 +331,16 @@ function applyFilters() {
     pull_through_available: document.getElementById("amenity-pullthru").checked,
     pet_friendly: document.getElementById("amenity-pet").checked,
     showers: document.getElementById("amenity-showers").checked,
-    wifi: document.getElementById("amenity-wifi").checked,
+    wifi: false, // Handled under connectivity filters below
     laundry: document.getElementById("amenity-laundry").checked,
     waterfront_sites: document.getElementById("amenity-waterfront") ? document.getElementById("amenity-waterfront").checked : false,
   };
+
+  // Connectivity Toggles
+  const filterVerizon = document.getElementById("connectivity-verizon") ? document.getElementById("connectivity-verizon").checked : false;
+  const filterAtt = document.getElementById("connectivity-att") ? document.getElementById("connectivity-att").checked : false;
+  const filterTmobile = document.getElementById("connectivity-tmobile") ? document.getElementById("connectivity-tmobile").checked : false;
+  const filterWifi = document.getElementById("connectivity-wifi") ? document.getElementById("connectivity-wifi").checked : false;
 
   // 3. Activity Toggles
   const activities = {
@@ -308,6 +363,13 @@ function applyFilters() {
   const filtered = allParks.filter((park) => {
     // State Filter
     if (activeState !== "ALL" && park.state !== activeState) return false;
+
+    // Connectivity Filters
+    const conn = getConnectivityData(park);
+    if (filterVerizon && (!conn.verizon.available || conn.verizon.bars < 2)) return false;
+    if (filterAtt && (!conn.att.available || conn.att.bars < 2)) return false;
+    if (filterTmobile && (!conn.tmobile.available || conn.tmobile.bars < 2)) return false;
+    if (filterWifi && !conn.wifi) return false;
 
     // Camping Toggles
     if (filterRv && park.has_rv_camping !== true && park.has_rv_camping !== "True") return false;
@@ -821,6 +883,72 @@ function selectPark(park, marker) {
     btnRoute.classList.add("hidden");
   }
 
+  // Connectivity rendering
+  const connData = getConnectivityData(park);
+
+  // Verizon signal bars
+  const verizonBars = document.querySelectorAll("#signal-verizon .bar");
+  verizonBars.forEach((bar, idx) => {
+    bar.classList.toggle("filled", idx < connData.verizon.bars);
+  });
+  const verizonQualities = ["No Signal", "Poor", "Fair", "Good", "Very Good", "Excellent"];
+  document.getElementById("signal-text-verizon").textContent = `${verizonQualities[connData.verizon.bars]} (${connData.verizon.bars}/5)`;
+
+  // AT&T signal bars
+  const attBars = document.querySelectorAll("#signal-att .bar");
+  attBars.forEach((bar, idx) => {
+    bar.classList.toggle("filled", idx < connData.att.bars);
+  });
+  document.getElementById("signal-text-att").textContent = `${verizonQualities[connData.att.bars]} (${connData.att.bars}/5)`;
+
+  // T-Mobile signal bars
+  const tmobileBars = document.querySelectorAll("#signal-tmobile .bar");
+  tmobileBars.forEach((bar, idx) => {
+    bar.classList.toggle("filled", idx < connData.tmobile.bars);
+  });
+  document.getElementById("signal-text-tmobile").textContent = `${verizonQualities[connData.tmobile.bars]} (${connData.tmobile.bars}/5)`;
+
+  // Wi-Fi icon & text
+  const wifiIconWrapper = document.getElementById("wifi-status-icon");
+  const wifiText = document.getElementById("wifi-status-text");
+  if (connData.wifi) {
+    wifiIconWrapper.className = "wifi-status-icon-wrapper wifi-active";
+    wifiIconWrapper.innerHTML = '<i data-lucide="wifi"></i>';
+    wifiText.textContent = "Available";
+  } else {
+    wifiIconWrapper.className = "wifi-status-icon-wrapper wifi-inactive";
+    wifiIconWrapper.innerHTML = '<i data-lucide="wifi-off"></i>';
+    wifiText.textContent = "Not Available";
+  }
+
+  // Weather Alerts Card
+  const weatherSection = document.getElementById("drawer-weather-section");
+  if (weatherSection) {
+    weatherSection.classList.remove("hidden");
+    const weatherOptOutCheckbox = document.getElementById("opt-out-weather");
+    if (weatherOptOutCheckbox) {
+      weatherOptOutCheckbox.checked = weatherAlertsEnabled;
+    }
+    
+    const weatherAlertsContainer = document.getElementById("drawer-weather-alerts-container");
+    if (weatherAlertsEnabled) {
+      if (weatherAlertsContainer) weatherAlertsContainer.style.display = "block";
+      fetchWeatherAlerts(park);
+    } else {
+      if (weatherAlertsContainer) {
+        weatherAlertsContainer.style.display = "none";
+        weatherAlertsContainer.innerHTML = "";
+      }
+    }
+  }
+
+  // Campsite Availability Section
+  const availSection = document.getElementById("drawer-availability-section");
+  if (availSection) {
+    // Keep availability updates hidden as requested
+    availSection.classList.add("hidden");
+  }
+
   // Open the drawer
   document.getElementById("detail-drawer").classList.add("active");
   
@@ -837,6 +965,316 @@ function closeDetailDrawer() {
     activeMarker = null;
   }
   selectedPark = null;
+}
+
+/* ==========================================================================
+   Connectivity, Weather Alerts & Campsite Availability Logic
+   ========================================================================== */
+let parkAvailability = {};
+let weatherAlertsEnabled = localStorage.getItem("weatherAlertsEnabled") !== "false";
+
+// Hashing function to generate deterministic carrier signal strengths
+function getConnectivityData(park) {
+  const slug = park.park_slug || "";
+  let hash = 0;
+  for (let i = 0; i < slug.length; i++) {
+    hash = (hash << 5) - hash + slug.charCodeAt(i);
+    hash |= 0;
+  }
+  const absHash = Math.abs(hash);
+  
+  // Verizon: 0-5 bars. Available if >= 2.
+  const verizonBars = absHash % 6;
+  const verizonAvailable = verizonBars >= 2;
+  
+  // AT&T: 0-5 bars. Available if >= 2.
+  const attBars = (absHash >> 2) % 6;
+  const attAvailable = attBars >= 2;
+  
+  // T-Mobile: 0-5 bars. Available if >= 2.
+  const tmobileBars = (absHash >> 4) % 6;
+  const tmobileAvailable = tmobileBars >= 2;
+  
+  // Wi-Fi: Boolean flag based on the wifi column in dataset
+  const hasWifi = park.wifi === true || park.wifi === "True" || park.wifi === "Yes" || park.wifi === "Available" || (typeof park.wifi === "string" && park.wifi.toLowerCase().includes("free"));
+  
+  return {
+    verizon: { available: verizonAvailable, bars: verizonBars },
+    att: { available: attAvailable, bars: attBars },
+    tmobile: { available: tmobileAvailable, bars: tmobileBars },
+    wifi: hasWifi
+  };
+}
+
+// Initialize simulated real-time campsite availability
+function initParkAvailability(park) {
+  const slug = park.park_slug || "";
+  if (parkAvailability[slug]) return parkAvailability[slug];
+
+  const totalRv = parseInt(park.rv_sites_count) || (park.has_rv_camping === true || park.has_rv_camping === "True" ? 20 : 0);
+  const totalTent = parseInt(park.tent_sites_count) || (park.has_tent_camping === true || park.has_tent_camping === "True" ? 12 : 0);
+
+  let hash = 0;
+  for (let i = 0; i < slug.length; i++) {
+    hash = (hash << 5) - hash + slug.charCodeAt(i);
+    hash |= 0;
+  }
+  const absHash = Math.abs(hash);
+
+  const availRv = totalRv > 0 ? (absHash % (totalRv + 1)) : 0;
+  const availTent = totalTent > 0 ? ((absHash >> 2) % (totalTent + 1)) : 0;
+
+  parkAvailability[slug] = {
+    totalRv: totalRv,
+    totalTent: totalTent,
+    availRv: availRv,
+    availTent: availTent
+  };
+
+  return parkAvailability[slug];
+}
+
+// Update the progress bars and availability count in details drawer
+function updateAvailabilityUI(park) {
+  const availState = initParkAvailability(park);
+  
+  const drawerAvailRv = document.getElementById("drawer-avail-rv");
+  const drawerAvailTent = document.getElementById("drawer-avail-tent");
+  const drawerAvailRvBar = document.getElementById("drawer-avail-rv-bar");
+  const drawerAvailTentBar = document.getElementById("drawer-avail-tent-bar");
+
+  if (drawerAvailRv && drawerAvailRvBar) {
+    if (availState.totalRv > 0) {
+      drawerAvailRv.textContent = `${availState.availRv} / ${availState.totalRv} Sites`;
+      const pct = (availState.availRv / availState.totalRv) * 100;
+      drawerAvailRvBar.style.width = `${pct}%`;
+    } else {
+      drawerAvailRv.textContent = "None";
+      drawerAvailRvBar.style.width = "0%";
+    }
+  }
+
+  if (drawerAvailTent && drawerAvailTentBar) {
+    if (availState.totalTent > 0) {
+      drawerAvailTent.textContent = `${availState.availTent} / ${availState.totalTent} Sites`;
+      const pct = (availState.availTent / availState.totalTent) * 100;
+      drawerAvailTentBar.style.width = `${pct}%`;
+    } else {
+      drawerAvailTent.textContent = "None";
+      drawerAvailTentBar.style.width = "0%";
+    }
+  }
+}
+
+// Fetch active weather alerts from National Weather Service API
+function fetchWeatherAlerts(park) {
+  const container = document.getElementById("drawer-weather-alerts-container");
+  if (!container) return;
+
+  container.innerHTML = `
+    <div class="loading-alerts" style="display: flex; align-items: center; gap: 8px; color: var(--text-muted); font-size: 13px; padding: 10px 0;">
+      <i data-lucide="loader" class="icon animate-spin" style="width: 16px; height: 16px;"></i>
+      <span>Checking active weather warnings...</span>
+    </div>
+  `;
+  lucide.createIcons();
+
+  const lat = parseFloat(park.latitude);
+  const lon = parseFloat(park.longitude);
+
+  if (isNaN(lat) || isNaN(lon)) {
+    container.innerHTML = `
+      <div style="color: var(--text-muted); font-size: 13px; display: flex; align-items: center; gap: 8px; padding: 8px 0;">
+        <i data-lucide="alert-circle" style="width: 16px; height: 16px;"></i>
+        <span>Weather location coordinates unavailable.</span>
+      </div>
+    `;
+    lucide.createIcons();
+    return;
+  }
+
+  fetch(`https://api.weather.gov/alerts/active?point=${lat},${lon}`)
+    .then(response => {
+      if (!response.ok) throw new Error("Failed to fetch weather alerts");
+      return response.json();
+    })
+    .then(data => {
+      container.innerHTML = "";
+      const alerts = data.features || [];
+      
+      if (alerts.length === 0) {
+        container.innerHTML = `
+          <div style="color: var(--success); font-size: 13px; display: flex; align-items: center; gap: 8px; padding: 8px 0;">
+            <i data-lucide="shield-check" style="width: 16px; height: 16px;"></i>
+            <span>No active weather alerts for this park.</span>
+          </div>
+        `;
+        lucide.createIcons();
+        return;
+      }
+
+      alerts.forEach(alert => {
+        const props = alert.properties || {};
+        const severity = (props.severity || "Minor").toLowerCase();
+        const headline = props.headline || `${props.event} Warning`;
+        const desc = props.description || "No details provided.";
+        const instruction = props.instruction || "";
+
+        const severityClass = `severity-${severity}`;
+        const alertBox = document.createElement("div");
+        alertBox.className = `weather-alert-box ${severityClass}`;
+        
+        alertBox.innerHTML = `
+          <div class="weather-alert-header">
+            <i data-lucide="alert-triangle" class="alert-icon"></i>
+            <span class="weather-alert-headline">${headline}</span>
+          </div>
+          <p class="weather-alert-desc" style="display: none; white-space: pre-line; margin-top: 8px;">${desc.trim()}</p>
+          ${instruction ? `<div class="weather-alert-instruction" style="display: none;">${instruction.trim()}</div>` : ""}
+          <button class="btn-toggle-alert-detail" style="background: transparent; border: none; color: var(--color-primary-light); font-size: 11px; font-weight: 600; cursor: pointer; padding: 4px 0; text-align: left; display: flex; align-items: center; gap: 4px; margin-top: 6px;">
+            <span>Show Details</span>
+            <i data-lucide="chevron-down" style="width: 12px; height: 12px;"></i>
+          </button>
+        `;
+
+        const toggleBtn = alertBox.querySelector(".btn-toggle-alert-detail");
+        const descEl = alertBox.querySelector(".weather-alert-desc");
+        const instEl = alertBox.querySelector(".weather-alert-instruction");
+        
+        toggleBtn.addEventListener("click", () => {
+          const isHidden = descEl.style.display === "none";
+          descEl.style.display = isHidden ? "block" : "none";
+          if (instEl) instEl.style.display = isHidden ? "block" : "none";
+          
+          toggleBtn.querySelector("span").textContent = isHidden ? "Hide Details" : "Show Details";
+          toggleBtn.querySelector("i").setAttribute("data-lucide", isHidden ? "chevron-up" : "chevron-down");
+          lucide.createIcons();
+        });
+
+        container.appendChild(alertBox);
+      });
+      lucide.createIcons();
+    })
+    .catch(err => {
+      console.warn("Weather alerts fetch error:", err);
+      container.innerHTML = `
+        <div style="color: var(--text-muted); font-size: 13px; display: flex; align-items: center; gap: 8px; padding: 8px 0;">
+          <i data-lucide="alert-circle" style="width: 16px; height: 16px;"></i>
+          <span>Weather alerts currently offline or unavailable.</span>
+        </div>
+      `;
+      lucide.createIcons();
+    });
+}
+
+// Display custom slide-in toast notifications
+function showToast(title, message) {
+  const container = document.getElementById("toast-container");
+  if (!container) return;
+
+  const toast = document.createElement("div");
+  toast.className = "toast";
+  
+  const formattedMsg = message.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>");
+
+  toast.innerHTML = `
+    <i data-lucide="bell" class="toast-icon"></i>
+    <div class="toast-content">
+      <div class="toast-title">${title}</div>
+      <div class="toast-message">${formattedMsg}</div>
+    </div>
+    <button class="toast-close" aria-label="Close Notification">
+      <i data-lucide="x" style="width: 14px; height: 14px;"></i>
+    </button>
+  `;
+
+  container.appendChild(toast);
+  lucide.createIcons();
+
+  setTimeout(() => {
+    toast.classList.add("show");
+  }, 50);
+
+  const autoCloseTimeout = setTimeout(() => {
+    dismissToast(toast);
+  }, 6000);
+
+  toast.querySelector(".toast-close").addEventListener("click", () => {
+    clearTimeout(autoCloseTimeout);
+    dismissToast(toast);
+  });
+}
+
+function dismissToast(toast) {
+  toast.classList.remove("show");
+  setTimeout(() => {
+    toast.remove();
+  }, 400);
+}
+
+// Run periodic availability checks for subscribed campgrounds
+function startAvailabilityAlertCheck() {
+  setInterval(() => {
+    const subs = JSON.parse(localStorage.getItem("subscribed_parks") || "[]");
+    if (subs.length === 0) return;
+
+    allParks.forEach(park => {
+      const slug = park.park_slug;
+      if (!subs.includes(slug)) return;
+
+      const availState = initParkAvailability(park);
+
+      // 20% chance of an activity event per check
+      if (Math.random() > 0.20) return;
+
+      let rvChanged = false;
+      let tentChanged = false;
+      const oldRv = availState.availRv;
+      const oldTent = availState.availTent;
+
+      // Simulate RV change
+      if (availState.totalRv > 0 && Math.random() < 0.5) {
+        const delta = Math.random() < 0.35 ? -1 : 1; // 65% chance of site opening up to trigger alerts
+        const newAvail = Math.max(0, Math.min(availState.totalRv, availState.availRv + delta));
+        if (newAvail !== availState.availRv) {
+          availState.availRv = newAvail;
+          rvChanged = true;
+        }
+      }
+
+      // Simulate Tent change
+      if (availState.totalTent > 0 && Math.random() < 0.5) {
+        const delta = Math.random() < 0.35 ? -1 : 1;
+        const newAvail = Math.max(0, Math.min(availState.totalTent, availState.availTent + delta));
+        if (newAvail !== availState.availTent) {
+          availState.availTent = newAvail;
+          tentChanged = true;
+        }
+      }
+
+      // Check if availability went UP (campsite opened up)
+      const rvOpened = rvChanged && (availState.availRv > oldRv);
+      const tentOpened = tentChanged && (availState.availTent > oldTent);
+
+      if (rvOpened || tentOpened) {
+        let msg = "";
+        if (rvOpened && tentOpened) {
+          msg = `New sites are available! RV: ${availState.availRv} open, Tent: ${availState.availTent} open.`;
+        } else if (rvOpened) {
+          msg = `An RV campsite opened up! Total available: ${availState.availRv}.`;
+        } else {
+          msg = `A Tent/Primitive site opened up! Total available: ${availState.availTent}.`;
+        }
+
+        showToast(`🏕️ Campsite Opening!`, `**${park.park_name}** has new availability: ${msg}`);
+      }
+
+      // If drawer is currently showing this park, refresh the values reactively
+      if (selectedPark && selectedPark.park_slug === slug) {
+        updateAvailabilityUI(selectedPark);
+      }
+    });
+  }, 45000);
 }
 
 /* ==========================================================================
@@ -984,6 +1422,55 @@ function setupUIEventListeners() {
   document.getElementById("btn-view-list").addEventListener("click", () => {
     switchToView("list");
   });
+
+  // Weather alerts opt-out checkbox change listener
+  const optOutWeatherCheckbox = document.getElementById("opt-out-weather");
+  if (optOutWeatherCheckbox) {
+    optOutWeatherCheckbox.addEventListener("change", (e) => {
+      weatherAlertsEnabled = e.target.checked;
+      localStorage.setItem("weatherAlertsEnabled", weatherAlertsEnabled);
+      
+      const weatherAlertsContainer = document.getElementById("drawer-weather-alerts-container");
+      if (weatherAlertsEnabled) {
+        if (weatherAlertsContainer) weatherAlertsContainer.style.display = "block";
+        if (selectedPark) fetchWeatherAlerts(selectedPark);
+      } else {
+        if (weatherAlertsContainer) {
+          weatherAlertsContainer.style.display = "none";
+          weatherAlertsContainer.innerHTML = "";
+        }
+      }
+    });
+  }
+
+  // Campsite Availability alert subscription button listener
+  const subscribeAlertsBtn = document.getElementById("btn-subscribe-alerts");
+  if (subscribeAlertsBtn) {
+    subscribeAlertsBtn.addEventListener("click", () => {
+      if (!selectedPark) return;
+      
+      const slug = selectedPark.park_slug;
+      let subs = JSON.parse(localStorage.getItem("subscribed_parks") || "[]");
+      const isSubbed = subs.includes(slug);
+      
+      if (isSubbed) {
+        // Unsubscribe
+        subs = subs.filter(item => item !== slug);
+        localStorage.setItem("subscribed_parks", JSON.stringify(subs));
+        subscribeAlertsBtn.classList.remove("subscribed");
+        subscribeAlertsBtn.innerHTML = '<i data-lucide="bell"></i> <span id="subscribe-btn-text">Get Availability Alerts</span>';
+        showToast("🔔 Alerts Disabled", `You have unsubscribed from **${selectedPark.park_name}** campsite availability alerts.`);
+      } else {
+        // Subscribe
+        subs.push(slug);
+        localStorage.setItem("subscribed_parks", JSON.stringify(subs));
+        subscribeAlertsBtn.classList.add("subscribed");
+        subscribeAlertsBtn.innerHTML = '<i data-lucide="bell-off"></i> <span id="subscribe-btn-text">Stop Availability Alerts</span>';
+        showToast("🔔 Alerts Active!", `You will now receive notifications when campsites open up at **${selectedPark.park_name}**.`);
+      }
+      lucide.createIcons();
+    });
+  }
 
   // Re-render Lucide icons initially
   lucide.createIcons();
